@@ -1,5 +1,6 @@
 package order;
 
+import jdk.vm.ci.code.site.Call;
 import privacyhookin.accesscontrol.AccessControlJwtCredential;
 import privacyhookin.accesscontrol.AccessControlUtils;
 import privacyhookin.dataminimization.DataMinimizerInterceptor;
@@ -23,8 +24,8 @@ import static com.peng.gprc_hook_in.common.Status.SUCCESS;
 public class OrderServer {
 
   private static final Logger logger = Logger.getLogger(OrderServer.class.getName());
-  private final CallCredentials callCredentials;
-  private final ServicesParser servicesParser;
+  private static ServicesParser servicesParser;
+  private static final String clientId = "order";
 
   private Server server;
   private final int port;
@@ -32,13 +33,9 @@ public class OrderServer {
   public OrderServer() {
     StringBuilder stringBuilder = new StringBuilder();
     String cwd = Paths.get(".").toAbsolutePath().normalize().toString();
-    stringBuilder.append(cwd);
-    stringBuilder.append("/src/main/java/order/services.json");
-    String configFile = stringBuilder.toString();
-    this.servicesParser = new ServicesParser(configFile);
-    String clientId = "order";
-    this.port = this.servicesParser.getPort(clientId);
-    this.callCredentials = new AccessControlJwtCredential(clientId);
+    String configFile = stringBuilder.append(cwd).append("/src/main/java/order/services.json").toString();
+    servicesParser = new ServicesParser(configFile);
+    this.port = servicesParser.getPort(clientId);
   }
 
   private void start() throws IOException {
@@ -79,10 +76,6 @@ public class OrderServer {
 
   static class OrderImpl extends OrderServiceGrpc.OrderServiceImplBase {
 
-    private final ServicesParser servicesParser = new ServicesParser("/home/brancaleone/Insync/" +
-            "riccardomarin23@gmail.com/Google Drive/University/SS22 - Privacy Engineering/Privacy-Hook-In/" +
-            "src/main/java/order/services.json");
-
     @Override
     public void orderMeal(OrderRequest req, StreamObserver<ResultResponse> responseObserver) {
       // TODO: write order to db and get generated order id
@@ -110,10 +103,12 @@ public class OrderServer {
     public ResultResponse SendMealInfo(int orderId, String meal){
       MealOrderRequest request = MealOrderRequest.newBuilder().setId(orderId).setMeal(meal).build();
       Channel channel = ManagedChannelBuilder
-              .forAddress(this.servicesParser.getHost("restaurant"),
-                          this.servicesParser.getPort("restaurant"))
+              .forAddress(servicesParser.getHost("restaurant"),
+                          servicesParser.getPort("restaurant"))
               .usePlaintext().build();
-      RestaurantServiceGrpc.RestaurantServiceBlockingStub restaurantStub = RestaurantServiceGrpc.newBlockingStub(channel);
+      RestaurantServiceGrpc.RestaurantServiceBlockingStub restaurantStub = RestaurantServiceGrpc
+              .newBlockingStub(channel)
+              .withCallCredentials(new AccessControlJwtCredential(clientId, "meal_cooking"));
       return restaurantStub.cookMeal(request);
     }
 
@@ -121,8 +116,8 @@ public class OrderServer {
       DeliveryAddress deliveryAddress = DeliveryAddress.newBuilder().setAddress(address).build();
       RoutingRequest request = RoutingRequest.newBuilder().setAddress(deliveryAddress).build();
       Channel channel = ManagedChannelBuilder
-              .forAddress(this.servicesParser.getHost("routing"),
-                      this.servicesParser.getPort("routing"))
+              .forAddress(servicesParser.getHost("routing"),
+                          servicesParser.getPort("routing"))
               .usePlaintext().build();
       RoutingServiceGrpc.RoutingServiceBlockingStub routingStub = RoutingServiceGrpc.newBlockingStub(channel);
       return routingStub.computeRoute(request);
@@ -131,8 +126,8 @@ public class OrderServer {
     public ResultResponse AssignDelivery(int orderId, String driverId){
       DriverAssignmentRequest request = DriverAssignmentRequest.newBuilder().setOrderId(orderId).setDriverId(driverId).build();
       Channel channel = ManagedChannelBuilder
-              .forAddress(this.servicesParser.getHost("driver"),
-                      this.servicesParser.getPort("driver"))
+              .forAddress(servicesParser.getHost("driver"),
+                          servicesParser.getPort("driver"))
               .usePlaintext().build();
       DriverServiceGrpc.DriverServiceBlockingStub driverStub = DriverServiceGrpc.newBlockingStub(channel);
       return driverStub.assignDriver(request);

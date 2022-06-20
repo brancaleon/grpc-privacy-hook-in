@@ -5,6 +5,11 @@ import io.grpc.Metadata;
 import io.grpc.Status;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+
+import java.sql.Date;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 
 /**
@@ -14,9 +19,11 @@ import java.util.concurrent.Executor;
 public class AccessControlJwtCredential extends CallCredentials {
 
   private final String subject;
+  private final String purpose;
 
-  public AccessControlJwtCredential(String subject) {
+  public AccessControlJwtCredential(String subject, String purpose) {
     this.subject = subject;
+    this.purpose = purpose;
   }
 
   @Override
@@ -26,7 +33,10 @@ public class AccessControlJwtCredential extends CallCredentials {
     // This example omits setting the expiration, but a real application should do it.
     final String jwt =
         Jwts.builder()
+            .setId(UUID.randomUUID().toString())
+            .claim("purpose", purpose)
             .setSubject(subject)
+            .setIssuedAt(Date.from(Instant.now())).setExpiration(Date.from(Instant.now().plus(8, ChronoUnit.HOURS)))
             .signWith(SignatureAlgorithm.HS256, AccessControlUtils.JWT_SIGNING_KEY)
             .compact();
 
