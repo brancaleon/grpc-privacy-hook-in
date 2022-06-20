@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.peng.gprc_hook_in.common";
+option java_outer_classname = "CommonProto";
+option objc_class_prefix = "HLW";
+
+package proto;
+
+enum Status {
+    SUCCESS = 0;
+    ERROR = 1;
+}
+
+message ResultResponse{
+    Status status = 1;
+    repeated string messages = 2;
+}
+
+message Position{
+    float latitude = 1;
+    float longitude = 2;
+}
+
+message Driver {
+    string name = 1;
+    string surname = 2;
+    string id = 3;
+    Position position = 4;
+}

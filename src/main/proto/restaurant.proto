@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.peng.gprc_hook_in.restaurant";
+option java_outer_classname = "RestaurantProto";
+option objc_class_prefix = "HLW";
+
+package proto;
+import "common.proto";
+
+message MealOrderRequest {
+    int32 id = 1;
+    string meal = 2;
+}
+
+message CollectMealRequest {
+    string driverId = 1;
+    string orderId = 2;
+}
+
+service RestaurantService {
+    rpc CookMeal (MealOrderRequest) returns (ResultResponse);
+    rpc CollectMeal (CollectMealRequest) returns (ResultResponse);
+}

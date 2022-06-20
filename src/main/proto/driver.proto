@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.peng.gprc_hook_in.driver";
+option java_outer_classname = "DriverProto";
+option objc_class_prefix = "HLW";
+
+package proto;
+import "common.proto";
+
+message DriverAssignmentRequest{
+    string driverId = 1;
+    int32 orderId = 2;
+}
+
+message DriverListRequest {
+}
+
+message DriverInfoRequest {
+    string driverId = 1;
+}
+
+message AvailableDriversResponse {
+    repeated Driver drivers = 1;
+}
+
+message DriverCheckRequest{
+    string driverId = 1;
+    int32 orderId = 2;
+}
+
+service DriverService {
+    rpc GetAvailableDrivers (DriverListRequest) returns (AvailableDriversResponse);
+    rpc AssignDriver (DriverAssignmentRequest) returns (ResultResponse);
+    rpc CheckDriverId(DriverCheckRequest) returns (ResultResponse);
+}

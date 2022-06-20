@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.peng.gprc_hook_in.routing";
+option java_outer_classname = "RoutingProto";
+option objc_class_prefix = "HLW";
+
+package proto;
+import "common.proto";
+
+message DeliveryAddress{
+    string address = 1;
+    optional string city = 3;
+    optional string zip = 4;
+    optional string country = 5;
+}
+
+message RoutingRequest{
+    DeliveryAddress address = 1;
+}
+
+message RouteResponse{
+    Driver chosenDriver = 1;
+    repeated Position route = 2;
+}
+
+service RoutingService {
+    rpc ComputeRoute (RoutingRequest) returns (RouteResponse);
+}
