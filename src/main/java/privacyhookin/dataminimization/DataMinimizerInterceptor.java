@@ -1,4 +1,4 @@
-package phi_data_minimization;
+package privacyhookin.dataminimization;
 
 import io.grpc.ForwardingServerCallListener.SimpleForwardingServerCallListener;
 import io.grpc.Metadata;
@@ -6,7 +6,7 @@ import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 
-public class RequestInterceptor implements ServerInterceptor {
+public class DataMinimizerInterceptor implements ServerInterceptor {
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
             ServerCall<ReqT, RespT> serverCall,

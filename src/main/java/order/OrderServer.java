@@ -1,9 +1,9 @@
 package order;
 
-import phi_access_control.Constant;
-import phi_data_minimization.RequestInterceptor;
+import privacyhookin.accesscontrol.AccessControlJwtCredential;
+import privacyhookin.accesscontrol.AccessControlUtils;
+import privacyhookin.dataminimization.DataMinimizerInterceptor;
 import com.peng.gprc_hook_in.common.ResultResponse;
-import com.peng.gprc_hook_in.common.Status;
 import com.peng.gprc_hook_in.driver.DriverAssignmentRequest;
 import com.peng.gprc_hook_in.driver.DriverServiceGrpc;
 import com.peng.gprc_hook_in.order.OrderRequest;
@@ -13,8 +13,10 @@ import com.peng.gprc_hook_in.restaurant.RestaurantServiceGrpc;
 import com.peng.gprc_hook_in.routing.*;
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
-
+import utils.ServicesParser;
+import java.nio.file.Paths;
 import java.io.IOException;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static com.peng.gprc_hook_in.common.Status.SUCCESS;
@@ -22,18 +24,29 @@ import static com.peng.gprc_hook_in.common.Status.SUCCESS;
 public class OrderServer {
 
   private static final Logger logger = Logger.getLogger(OrderServer.class.getName());
+  private final CallCredentials callCredentials;
 
   private Server server;
+  private final String host;
   private final int port;
 
-  public OrderServer(int port) {
-    this.port = port;
+  public OrderServer() {
+    StringBuilder stringBuilder = new StringBuilder();
+    String cwd = Paths.get(".").toAbsolutePath().normalize().toString();
+    stringBuilder.append(cwd);
+    stringBuilder.append("/src/main/java/order/services.json");
+    String configFile = stringBuilder.toString();
+    Map servicesMap = ServicesParser.parse(configFile);
+    String clientId = "client";
+    this.callCredentials = new AccessControlJwtCredential(clientId);
+    this.host = "localhost";
+    this.port = 50001;
   }
 
   private void start() throws IOException {
     server = ServerBuilder.forPort(port)
         .addService(new OrderImpl())
-        .intercept(new RequestInterceptor())  // add the JwtServerInterceptor
+        .intercept(new DataMinimizerInterceptor())
         .build()
         .start();
     logger.info("Server started, listening on " + port);
@@ -63,11 +76,7 @@ public class OrderServer {
   public static void main(String[] args) throws IOException, InterruptedException {
 
     int port = 50051; // default
-    if (args.length > 0) {
-      port = Integer.parseInt(args[0]);
-    }
-
-    final OrderServer server = new OrderServer(port);
+    final OrderServer server = new OrderServer();
     server.start();
     server.blockUntilShutdown();
   }
@@ -75,7 +84,6 @@ public class OrderServer {
   static class OrderImpl extends OrderServiceGrpc.OrderServiceImplBase {
     @Override
     public void orderMeal(OrderRequest req, StreamObserver<ResultResponse> responseObserver) {
-      // TODO: fullfill the order
       // TODO: write order to db and get generated order id
       int orderId = 1;
       String meal = req.getMeal();
@@ -86,13 +94,16 @@ public class OrderServer {
       String driverId = routeInfo.getChosenDriver().getId();
       // 3. Assign delivery
       ResultResponse deliveryAssigned = this.AssignDelivery(orderId, driverId);
+      // 4. Receive confirmation from restaurant
+      // 5. Receive confirmation from driver
+      // 6. Finalize order
+      // TODO: set order as completed
       // get client id added to context by interceptor
-      String clientId = Constant.CLIENT_ID_CONTEXT_KEY.get();
+      String clientId = AccessControlUtils.CLIENT_ID_CONTEXT_KEY.get();
       logger.info("Processing request from " + clientId);
-      Status status = SUCCESS;
-      // ResultResponse reply = ResultResponse.newBuilder().setStatus(status).setField(new Descriptors.FieldDescriptor, new int[5]).build();
-      // responseObserver.onNext(reply);
-      // responseObserver.onCompleted();
+      ResultResponse reply = ResultResponse.newBuilder().setStatus(SUCCESS).setMessages(0, "OK").build();
+      responseObserver.onNext(reply);
+      responseObserver.onCompleted();
     }
 
     public ResultResponse SendMealInfo(int orderId, String meal){

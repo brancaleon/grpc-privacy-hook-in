@@ -1,0 +1,57 @@
+{
+  "protoFile": "../app/proto/order.proto",
+  "purposes": [
+    {
+      "id": "meal_purchase",
+      "name": "Meal purchase",
+      "allowed_services": [
+        "order_service"
+      ],
+      "fields": [
+        "name",
+        "address"
+      ]
+    },
+    {
+      "id": "meal_delivery",
+      "name": "Meal delivery",
+      "allowed_services": [
+        "driver_service"
+      ],
+      "fields": [
+        "address"
+      ]
+    },
+    {
+      "id": "meal_cooking",
+      "name": "Meal cooking",
+      "allowed_services": [
+        "restaurant_service"
+      ],
+      "fields": [
+        "meal",
+        "address"
+      ]
+    },
+    {
+      "id": "meal_collection",
+      "name": "Meal collection",
+      "allowed_services": [
+        "restaurant_service"
+      ],
+      "fields":[
+        "id"
+      ]
+    },
+    {
+      "id": "route_computation",
+      "name": "Route computation",
+      "allowed_services": [
+        "routing_service"
+      ],
+      "fields": [
+        "position"
+      ]
+    }
+  ]
+}

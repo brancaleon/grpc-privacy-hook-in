@@ -1,4 +1,5 @@
-package phi_access_control;
+/**
+package privacyhookin.accesscontrol;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -23,7 +24,7 @@ public class AuthServer {
   private void start() throws IOException {
     server = ServerBuilder.forPort(port)
         .addService(new GreeterImpl())
-        .intercept(new JwtServerInterceptor())  // add the JwtServerInterceptor
+        .intercept(new AccessControlServerInterceptor())  // add the JwtServerInterceptor
         .build()
         .start();
     logger.info("Server started, listening on " + port);
@@ -44,18 +45,12 @@ public class AuthServer {
     }
   }
 
-  /**
-   * Await termination on the main thread since the grpc library uses daemon threads.
-   */
   private void blockUntilShutdown() throws InterruptedException {
     if (server != null) {
       server.awaitTermination();
     }
   }
 
-  /**
-   * Main launches the server from the command line.
-   */
   public static void main(String[] args) throws IOException, InterruptedException {
 
     // The port on which the server should run
@@ -73,7 +68,7 @@ public class AuthServer {
     @Override
     public void sayHello(HelloRequest req, StreamObserver<HelloReply> responseObserver) {
       // get client id added to context by interceptor
-      String clientId = Constant.CLIENT_ID_CONTEXT_KEY.get();
+      String clientId = AccessControlUtils.CLIENT_ID_CONTEXT_KEY.get();
       logger.info("Processing request from " + clientId);
       HelloReply reply = HelloReply.newBuilder().setMessage("Hello, " + req.getName()).build();
       responseObserver.onNext(reply);
@@ -81,3 +76,4 @@ public class AuthServer {
     }
   }
 }
+*/
