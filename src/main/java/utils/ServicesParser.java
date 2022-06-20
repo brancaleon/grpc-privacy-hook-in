@@ -1,25 +1,38 @@
 package utils;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jdk.jpackage.internal.IOUtils;
-
-import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Map;
 
 public class ServicesParser {
 
-    public static Map parse(String fileName) {
+    private final JsonNode servicesConfig;
+
+    public ServicesParser(String fileName){
+        this.servicesConfig = this.parse(fileName);
+    }
+
+    public JsonNode parse(String fileName) {
         ObjectMapper mapper = new ObjectMapper();
         try {
             String content = new String(Files.readAllBytes(Paths.get(fileName)));
-            return mapper.readValue(content, Map.class);
+            return mapper.readTree(content);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
     }
+
+    public String getHost(String clientId){
+        return this.servicesConfig.get(clientId).get("host").asText();
+    }
+
+    public Integer getPort(String clientId){
+        return Integer.parseInt(String.valueOf(this.servicesConfig.get(clientId).get("port").asInt()));
+    }
+
+
+
 }
