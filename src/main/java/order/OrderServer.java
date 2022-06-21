@@ -44,6 +44,7 @@ public class OrderServer {
         .intercept(new DataMinimizerInterceptor())
         .build()
         .start();
+    // test
     logger.info("Server started, listening on " + port);
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
