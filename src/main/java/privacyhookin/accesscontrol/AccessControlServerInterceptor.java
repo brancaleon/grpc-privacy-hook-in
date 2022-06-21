@@ -20,9 +20,6 @@ import io.jsonwebtoken.Jwts;
  * verification.
  */
 public class AccessControlServerInterceptor implements ServerInterceptor {
-
-  private JwtParser parser = Jwts.parser().setSigningKey(AccessControlUtils.JWT_SIGNING_KEY);
-
   @Override
   public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> serverCall,
       Metadata metadata, ServerCallHandler<ReqT, RespT> serverCallHandler) {
@@ -34,10 +31,13 @@ public class AccessControlServerInterceptor implements ServerInterceptor {
     } else if (!value.startsWith(AccessControlUtils.BEARER_TYPE)) {
       status = Status.UNAUTHENTICATED.withDescription("Unknown authorization type");
     } else {
-      Jws<Claims> claims = null;
       // remove authorization type prefix
       String token = value.substring(AccessControlUtils.BEARER_TYPE.length()).trim();
+      Jws<Claims> claims = null;
       try {
+        JwtParser parser = Jwts.parser().setSigningKey(
+                AccessControlUtils.getPublicKey(AccessControlUtils.CLIENT_ID_CONTEXT_KEY.toString())
+        );
         // verify token signature and parse claims
         claims = parser.parseClaimsJws(token);
       } catch (JwtException e) {

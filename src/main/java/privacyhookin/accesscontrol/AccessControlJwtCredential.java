@@ -37,7 +37,7 @@ public class AccessControlJwtCredential extends CallCredentials {
             .claim("purpose", purpose)
             .setSubject(subject)
             .setIssuedAt(Date.from(Instant.now())).setExpiration(Date.from(Instant.now().plus(8, ChronoUnit.HOURS)))
-            .signWith(SignatureAlgorithm.HS256, AccessControlUtils.JWT_SIGNING_KEY)
+            .signWith(SignatureAlgorithm.RS512, AccessControlUtils.PRIVATE_KEY)
             .compact();
 
     executor.execute(new Runnable() {

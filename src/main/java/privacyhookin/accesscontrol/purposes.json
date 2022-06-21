@@ -1,0 +1,41 @@
+{
+  "purposes": {
+    "meal_purchase": {
+      "name": "Meal purchase",
+      "allowed_services": [
+        "order"
+      ]
+    },
+    "meal_delivery": {
+      "name": "Meal delivery",
+      "allowed_services": [
+        "driver"
+      ]
+    },
+    "meal_cooking": {
+      "name": "Meal cooking",
+      "allowed_services": [
+        "restaurant"
+      ]
+    },
+    "meal_collection": {
+      "name": "Meal collection",
+      "allowed_services": [
+        "restaurant"
+      ]
+    },
+    "route_computation": {
+      "name": "Route computation",
+      "allowed_services": [
+        "routing"
+      ]
+    }
+  },
+  "public_keys": {
+    "driver": "1234",
+    "order": "1234",
+    "restaurant": "1234",
+    "routing": "1234"
+  },
+  "private_key": "1234"
+}
