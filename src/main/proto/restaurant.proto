@@ -15,7 +15,7 @@ message MealOrderRequest {
 
 message CollectMealRequest {
     string driverId = 1;
-    string orderId = 2;
+    int32 orderId = 2;
 }
 
 service RestaurantService {

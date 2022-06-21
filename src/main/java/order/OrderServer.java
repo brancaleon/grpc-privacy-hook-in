@@ -1,7 +1,7 @@
 package order;
 
-import jdk.vm.ci.code.site.Call;
 import privacyhookin.accesscontrol.AccessControlJwtCredential;
+import privacyhookin.accesscontrol.AccessControlServerInterceptor;
 import privacyhookin.accesscontrol.AccessControlUtils;
 import privacyhookin.dataminimization.DataMinimizerInterceptor;
 import com.peng.gprc_hook_in.common.ResultResponse;
@@ -42,9 +42,9 @@ public class OrderServer {
     server = ServerBuilder.forPort(this.port)
         .addService(new OrderImpl())
         .intercept(new DataMinimizerInterceptor())
+        .intercept(new AccessControlServerInterceptor())
         .build()
         .start();
-    // test
     logger.info("Server started, listening on " + port);
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
@@ -78,14 +78,14 @@ public class OrderServer {
   static class OrderImpl extends OrderServiceGrpc.OrderServiceImplBase {
 
     @Override
-    public void orderMeal(OrderRequest req, StreamObserver<ResultResponse> responseObserver) {
+    public void orderMeal(OrderRequest request, StreamObserver<ResultResponse> responseObserver) {
       // TODO: write order to db and get generated order id
       int orderId = 1;
-      String meal = req.getMeal();
+      String meal = request.getMeal();
       // 1. Send meal info to restaurant for cooking
       ResultResponse mealReady = this.SendMealInfo(orderId, meal);
       // 2. Find route through RoutingService
-      RouteResponse routeInfo = this.FindRoute(req.getAddress());
+      RouteResponse routeInfo = this.FindRoute(request.getAddress());
       String driverId = routeInfo.getChosenDriver().getId();
       // 3. Assign delivery
       ResultResponse deliveryAssigned = this.AssignDelivery(orderId, driverId);
