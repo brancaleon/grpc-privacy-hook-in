@@ -79,26 +79,26 @@ public class OrderServer {
 
     @Override
     public void orderMeal(OrderRequest request, StreamObserver<ResultResponse> responseObserver) {
-      // TODO: write order to db and get generated order id
-      int orderId = 1;
-      String meal = request.getMeal();
-      // 1. Send meal info to restaurant for cooking
-      ResultResponse mealReady = this.SendMealInfo(orderId, meal);
-      // 2. Find route through RoutingService
-      RouteResponse routeInfo = this.FindRoute(request.getAddress());
-      String driverId = routeInfo.getChosenDriver().getId();
-      // 3. Assign delivery
-      ResultResponse deliveryAssigned = this.AssignDelivery(orderId, driverId);
-      // 4. Receive confirmation from restaurant
-      // 5. Receive confirmation from driver
-      // 6. Finalize order
-      // TODO: set order as completed
-      // get client id added to context by interceptor
-      String clientId = AccessControlUtils.CLIENT_ID_CONTEXT_KEY.get();
-      logger.info("Processing request from " + clientId);
-      ResultResponse reply = ResultResponse.newBuilder().setStatus(SUCCESS).setMessages(0, "OK").build();
-      responseObserver.onNext(reply);
-      responseObserver.onCompleted();
+        // TODO: write order to db and get generated order id
+        int orderId = 1;
+        String meal = request.getMeal();
+        // 1. Send meal info to restaurant for cooking
+        ResultResponse mealReady = this.SendMealInfo(orderId, meal);
+        // 2. Find route through RoutingService
+        RouteResponse routeInfo = this.FindRoute(request.getAddress());
+        String driverId = routeInfo.getChosenDriver().getId();
+        // 3. Assign delivery
+        ResultResponse deliveryAssigned = this.AssignDelivery(orderId, driverId);
+        // 4. Receive confirmation from restaurant
+        // 5. Receive confirmation from driver
+        // 6. Finalize order
+        // TODO: set order as completed
+        // get client id added to context by interceptor
+        String clientId = AccessControlUtils.CLIENT_ID_CONTEXT_KEY.get();
+        logger.info("Processing request from " + clientId);
+        ResultResponse reply = ResultResponse.newBuilder().setStatus(SUCCESS).setMessages(0, "OK").build();
+        responseObserver.onNext(reply);
+        responseObserver.onCompleted();
     }
 
     public ResultResponse SendMealInfo(int orderId, String meal){

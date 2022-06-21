@@ -26,14 +26,28 @@ public class AccessControlPurposesParser {
         return null;
     }
 
-    public String getPrivateKey(){
-        return this.purposesConfig.get("private_key").asText();
+    public String getPrivateKeyPEM() {
+        String keyPath = Paths.get(".").toAbsolutePath().normalize()
+                        + "/src/main/java/privacyhookin/accesscontrol/jwtRS512.key";
+        String key;
+        try {
+            key = new String(Files.readAllBytes(Paths.get(keyPath)));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return key;
     }
 
-    public String getPublicKey(String clientId){
-        return this.purposesConfig.get("public_keys").get(clientId).asText();
+    public String getPublicKeyPEM(String clientId){
+        String keyPath = Paths.get(".").toAbsolutePath().normalize()
+                        + "/src/main/java/privacyhookin/accesscontrol/jwtRS512.key.pub";
+        String key;
+        try {
+            key = new String(Files.readAllBytes(Paths.get(keyPath)));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return key;
     }
-
-
 
 }
