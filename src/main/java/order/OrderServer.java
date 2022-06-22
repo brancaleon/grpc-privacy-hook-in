@@ -93,10 +93,7 @@ public class OrderServer {
         // 5. Receive confirmation from driver
         // 6. Finalize order
         // TODO: set order as completed
-        // get client id added to context by interceptor
-        String clientId = AccessControlUtils.CLIENT_ID_CONTEXT_KEY.get();
-        logger.info("Processing request from " + clientId);
-        ResultResponse reply = ResultResponse.newBuilder().setStatus(SUCCESS).setMessages(0, "OK").build();
+        ResultResponse reply = ResultResponse.newBuilder().setStatus(SUCCESS).build();
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
     }

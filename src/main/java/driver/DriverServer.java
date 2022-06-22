@@ -89,9 +89,7 @@ public class DriverServer {
       // TODO: link the driver to the order on db
       String driverId = request.getDriverId();
       Integer orderId = request.getOrderId();
-      ResultResponse reply = ResultResponse.newBuilder()
-              .setStatus(SUCCESS)
-              .setMessages(0, "Alles ok").build();
+      ResultResponse reply = ResultResponse.newBuilder().setStatus(SUCCESS).build();
       responseObserver.onNext(reply);
       responseObserver.onCompleted();
     }
@@ -104,14 +102,12 @@ public class DriverServer {
       String orderDriverId = "1";
       ResultResponse reply = null;
       if (request.getDriverId().equals(orderDriverId)){
-        reply = ResultResponse.newBuilder()
-                .setStatus(SUCCESS)
-                .setMessages(0, "Alles ok").build();
+        reply = ResultResponse.newBuilder().setStatus(SUCCESS).build();
       }
       else{
         reply = ResultResponse.newBuilder()
                 .setStatus(ERROR)
-                .setMessages(0, "He is not the legitimate driver, do not give him any meals!").build();
+                .addMessages("He is not the legitimate driver, do not give him any meals!").build();
       }
       responseObserver.onNext(reply);
       responseObserver.onCompleted();

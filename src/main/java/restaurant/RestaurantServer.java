@@ -85,7 +85,7 @@ public class RestaurantServer {
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
       }
-      ResultResponse reply = ResultResponse.newBuilder().setStatus(SUCCESS).setMessages(0, "Meal is ready").build();
+      ResultResponse reply = ResultResponse.newBuilder().setStatus(SUCCESS).addMessages("Meal is ready").build();
       responseObserver.onNext(reply);
       responseObserver.onCompleted();
     }
@@ -107,7 +107,7 @@ public class RestaurantServer {
       if (response.getStatus() == SUCCESS) {
         reply = ResultResponse.newBuilder()
                 .setStatus(SUCCESS)
-                .setMessages(0, "Meal collected by the driver").build();
+                .addMessages("Meal collected by the driver").build();
       }
       responseObserver.onNext(reply);
       responseObserver.onCompleted();
