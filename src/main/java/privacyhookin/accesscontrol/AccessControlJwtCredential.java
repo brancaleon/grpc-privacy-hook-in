@@ -37,7 +37,7 @@ public class AccessControlJwtCredential extends CallCredentials {
             .claim("purpose", purpose)
             .setSubject(subject)
             .setIssuedAt(Date.from(Instant.now())).setExpiration(Date.from(Instant.now().plus(8, ChronoUnit.HOURS)))
-            .signWith(SignatureAlgorithm.RS512, AccessControlUtils.PRIVATE_KEY)
+            .signWith(SignatureAlgorithm.RS512, AccessControlUtils.getPrivateKey(this.subject))
             .compact();
 
     executor.execute(new Runnable() {
@@ -47,6 +47,7 @@ public class AccessControlJwtCredential extends CallCredentials {
           Metadata headers = new Metadata();
           headers.put(AccessControlUtils.AUTHORIZATION_METADATA_KEY,
               String.format("%s %s", AccessControlUtils.BEARER_TYPE, jwt));
+          headers.put(AccessControlUtils.CLIENT_ID_METADATA_KEY, subject);
           metadataApplier.apply(headers);
         } catch (Throwable e) {
           metadataApplier.fail(Status.UNAUTHENTICATED.withCause(e));

@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Base64;
+import java.security.spec.X509EncodedKeySpec;
 
 import static io.grpc.Metadata.ASCII_STRING_MARSHALLER;
 
@@ -18,10 +18,10 @@ final public class AccessControlUtils {
 
     static public final String PURPOSES_FILE = Paths.get(".").toAbsolutePath().normalize() +
             "/src/main/java/privacyhookin/accesscontrol/purposes.json";
-    static public final PrivateKey PRIVATE_KEY = getPrivateKey();
     static public final String BEARER_TYPE = "Bearer";
 
     static public final Metadata.Key<String> AUTHORIZATION_METADATA_KEY = Metadata.Key.of("Authorization", ASCII_STRING_MARSHALLER);
+    static public final Metadata.Key<String> CLIENT_ID_METADATA_KEY = Metadata.Key.of("clientId", ASCII_STRING_MARSHALLER);
     static public final Context.Key<String> CLIENT_ID_CONTEXT_KEY = Context.key("clientId");
 
     private AccessControlUtils() {
@@ -29,44 +29,34 @@ final public class AccessControlUtils {
     }
 
     static public PublicKey getPublicKey(String clientId){
-        String publicKeyPEM = new AccessControlPurposesParser(PURPOSES_FILE).getPublicKeyPEM(clientId);
-        publicKeyPEM = publicKeyPEM.replace("-----BEGIN PUBLIC KEY-----\n", "");
-        publicKeyPEM = publicKeyPEM.replace("-----END PUBLIC KEY-----", "");
-        publicKeyPEM = publicKeyPEM.replaceAll("\\s+","");
-        byte[] encodedKey = Base64.getDecoder().decode(publicKeyPEM);
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encodedKey);
-
-        // KeyFactory fact = KeyFactory.getInstance("RSA");
-        // X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(keyContentAsBytes);
-        // PublicKey publicKey = fact.generatePublic(pubKeySpec);
-
-        PublicKey pubKey = null;
+        byte[] publicKeyBytes = new AccessControlPurposesParser(PURPOSES_FILE).getKeyBytes("public_key", clientId);
+        X509EncodedKeySpec spec = new X509EncodedKeySpec(publicKeyBytes);
+        KeyFactory kf = null;
         try {
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            pubKey = kf.generatePublic(keySpec);
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            e.printStackTrace();
+            kf = KeyFactory.getInstance("RSA");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
-        return pubKey;
+        try {
+            return kf.generatePublic(spec);
+        } catch (InvalidKeySpecException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    static public PrivateKey getPrivateKey(){
-        String privateKeyPEM = new AccessControlPurposesParser(PURPOSES_FILE).getPrivateKeyPEM();
-        privateKeyPEM = privateKeyPEM.replace("-----BEGIN PRIVATE KEY-----\n", "");
-        privateKeyPEM = privateKeyPEM.replace("-----BEGIN OPENSSH PRIVATE KEY-----\n", "");
-        privateKeyPEM = privateKeyPEM.replace("-----END PRIVATE KEY-----", "");
-        privateKeyPEM = privateKeyPEM.replace("-----END OPENSSH PRIVATE KEY-----", "");
-        privateKeyPEM = privateKeyPEM.replaceAll("\\s+","");
-        byte[] encodedKey = Base64.getDecoder().decode(privateKeyPEM);
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encodedKey);
-
-        PrivateKey privKey = null;
+    static public PrivateKey getPrivateKey(String clientId){
+        byte[] privateKeyBytes = new AccessControlPurposesParser(PURPOSES_FILE).getKeyBytes("private_key", clientId);
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(privateKeyBytes);
+        KeyFactory kf = null;
         try {
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            privKey = kf.generatePrivate(keySpec);
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            e.printStackTrace();
+            kf = KeyFactory.getInstance("RSA");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
-        return privKey;
+        try {
+            return kf.generatePrivate(spec);
+        } catch (InvalidKeySpecException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

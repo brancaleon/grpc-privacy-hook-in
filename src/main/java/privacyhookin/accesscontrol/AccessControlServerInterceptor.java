@@ -36,11 +36,11 @@ public class AccessControlServerInterceptor implements ServerInterceptor {
       Jws<Claims> claims = null;
       try {
         JwtParser parser = Jwts.parser().setSigningKey(
-                AccessControlUtils.getPublicKey(AccessControlUtils.CLIENT_ID_CONTEXT_KEY.toString())
+                AccessControlUtils.getPublicKey(metadata.get(AccessControlUtils.CLIENT_ID_METADATA_KEY))
         );
         // verify token signature and parse claims
         claims = parser.parseClaimsJws(token);
-      } catch (JwtException e) {
+      } catch (Exception e) {
         status = Status.UNAUTHENTICATED.withDescription(e.getMessage()).withCause(e);
       }
       if (claims != null) {

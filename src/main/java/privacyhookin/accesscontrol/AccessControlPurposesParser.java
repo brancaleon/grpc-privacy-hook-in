@@ -26,24 +26,12 @@ public class AccessControlPurposesParser {
         return null;
     }
 
-    public String getPrivateKeyPEM() {
+    public byte[] getKeyBytes(String type, String clientId) {
         String keyPath = Paths.get(".").toAbsolutePath().normalize()
-                        + "/src/main/java/privacyhookin/accesscontrol/jwtRS512.key";
-        String key;
+                        + String.format("/src/main/java/privacyhookin/accesscontrol/%s_%s.der", type, clientId);
+        byte[] key;
         try {
-            key = new String(Files.readAllBytes(Paths.get(keyPath)));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return key;
-    }
-
-    public String getPublicKeyPEM(String clientId){
-        String keyPath = Paths.get(".").toAbsolutePath().normalize()
-                        + "/src/main/java/privacyhookin/accesscontrol/jwtRS512.key.pub";
-        String key;
-        try {
-            key = new String(Files.readAllBytes(Paths.get(keyPath)));
+            key = Files.readAllBytes(Paths.get(keyPath));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
