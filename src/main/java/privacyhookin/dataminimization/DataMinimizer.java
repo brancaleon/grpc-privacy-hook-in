@@ -9,6 +9,7 @@ public class DataMinimizer {
         // TODO: Read config from file and apply functions to req object.
         //  Config can be JSON file and should map proto fields (as defined in the .proto files)
         //  to the data minimization functions to apply
+        // fields can be accessed in this way: ((OrderRequest) req).meal_ or ((OrderRequest) req).getMeal()
         return req;
     }
 
