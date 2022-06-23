@@ -1,16 +1,41 @@
 package privacyhookin.dataminimization;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.protobuf.Descriptors;
 import com.peng.gprc_hook_in.common.Position;
+
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 
 public class DataMinimizer {
     public<ReqT> ReqT minimize(ReqT req){
+        String configFile = Paths.get(".").toAbsolutePath().normalize()
+                + "/src/main/java/privacyhookin/dataminimization/minimizations.json";
+        JsonNode config = parseConfig(configFile);
+        String objectType = req.getClass().getSimpleName();
+        JsonNode requestObjectConfig = config.get(objectType);
+        // req.getField()
+        // Descriptors.FieldDescriptor fieldDescriptor = req.getDescriptorForType().findFieldByName("fieldXyz");
+        // Object value = message.getField(fieldDescriptor);
         // TODO: Read config from file and apply functions to req object.
         //  Config can be JSON file and should map proto fields (as defined in the .proto files)
         //  to the data minimization functions to apply
         // fields can be accessed in this way: ((OrderRequest) req).meal_ or ((OrderRequest) req).getMeal()
         return req;
+    }
+    public JsonNode parseConfig(String fileName) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            String content = new String(Files.readAllBytes(Paths.get(fileName)));
+            return mapper.readTree(content);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static Object erasure(Object base, String field){
