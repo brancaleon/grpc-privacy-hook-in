@@ -9,9 +9,10 @@ import io.grpc.ServerInterceptor;
 import io.grpc.Status;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
+
+import static privacyhookin.accesscontrol.AccessControlUtils.PURPOSES_FILE;
 
 /**
  * This interceptor gets the JWT from the metadata, verifies it and sets the client identifier
@@ -40,15 +41,20 @@ public class AccessControlServerInterceptor implements ServerInterceptor {
         );
         // verify token signature and parse claims
         claims = parser.parseClaimsJws(token);
+        String subject = claims.getBody().getSubject();
+        String purpose = (String) claims.getBody().get("purpose");
+        boolean clientAllowedForPurpose = new AccessControlPurposesParser(PURPOSES_FILE).isAllowedPurpose(purpose, subject);
+        if (!clientAllowedForPurpose){
+          throw new Exception("Client unauthorized for this purpose");
+        }
+        // set client id into current context
+        Context ctx = Context.current()
+                .withValue(AccessControlUtils.CLIENT_ID_CONTEXT_KEY, subject);
+        return Contexts.interceptCall(ctx, serverCall, metadata, serverCallHandler);
       } catch (Exception e) {
         status = Status.UNAUTHENTICATED.withDescription(e.getMessage()).withCause(e);
       }
-      if (claims != null) {
-        // set client id into current context
-        Context ctx = Context.current()
-            .withValue(AccessControlUtils.CLIENT_ID_CONTEXT_KEY, claims.getBody().getSubject());
-        return Contexts.interceptCall(ctx, serverCall, metadata, serverCallHandler);
-      }
+
     }
 
     serverCall.close(status, new Metadata());

@@ -2,6 +2,8 @@ package privacyhookin.accesscontrol;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,6 +38,23 @@ public class AccessControlPurposesParser {
             throw new RuntimeException(e);
         }
         return key;
+    }
+
+    public boolean isAllowedPurpose(String purpose, String clientId){
+        boolean allowed = true; // TODO: restore to false
+        ArrayNode allowedServices = ((ObjectNode) this.purposesConfig)._children
+                .get("purposes")
+                .get(purpose)
+                .get("allowed_services")._children;
+        // TODO: check if he is in the list of allowed services linked to the purpose
+        /*
+        for (Node allowedService: allowedServices) {
+            if(allowedService == clientId){
+                allowed = true;
+            }
+        }
+        */
+        return allowed;
     }
 
 }
