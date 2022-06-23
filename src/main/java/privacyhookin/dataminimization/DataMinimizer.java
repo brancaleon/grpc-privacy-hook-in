@@ -10,8 +10,20 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
+import java.util.HashMap;
+import java.util.function.UnaryOperator;
 
 public class DataMinimizer {
+
+    // TODO: add method for adding custom stuff
+    // TODO: implement the standard operators
+    HashMap<String, UnaryOperator<?>> functions = new HashMap<>();
+
+    public DataMinimizer() {
+        functions.put("erasure", (value) -> null);
+        // functions.put("noising", (value) -> noising(value));
+    }
+
     public<ReqT> ReqT minimize(ReqT req){
         String configFile = Paths.get(".").toAbsolutePath().normalize()
                 + "/src/main/java/privacyhookin/dataminimization/minimizations.json";
@@ -38,9 +50,11 @@ public class DataMinimizer {
         return null;
     }
 
-    public static Object erasure(Object base, String field){
+    public static Object erasure(Object field){
         // TODO: Perform erasure of data field
-        return base;
+        return field;
+        UnaryOperator<Integer>
+        (value) -> null
     }
 
     public static Object generalization(Object base, String field){

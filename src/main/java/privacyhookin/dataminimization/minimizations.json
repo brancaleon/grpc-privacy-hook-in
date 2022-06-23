@@ -1,9 +1,0 @@
-{
-  "MealOrderRequest": {
-    "id": null,
-    "name": "erasure",
-    "surname": "erasure",
-    "address" : "erasure",
-    "meal": null
-  }
-}

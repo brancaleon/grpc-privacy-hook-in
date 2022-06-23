@@ -3,8 +3,28 @@
     "meal_purchase": {
       "name": "Meal purchase",
       "allowed_services": [
-        "order", "client"
-      ]
+        "driver"
+      ],
+      "minimization": {
+        "MealOrderRequest": {
+          "name": [
+            {
+              "function": "erasure"
+            }
+          ],
+          "surname": [
+            {
+              "function": "generalize",
+              "range": 10
+            }
+          ],
+          "address.longtitude": [
+            {
+              "function": "erasure"
+            }
+          ]
+        }
+      }
     },
     "meal_delivery": {
       "name": "Meal delivery",
@@ -30,12 +50,5 @@
         "routing"
       ]
     }
-  },
-  "public_keys": {
-    "driver": "driver",
-    "order": "order",
-    "restaurant": "restaurant",
-    "routing": "routing"
-  },
-  "private_key": "my-secret-key"
+  }
 }
