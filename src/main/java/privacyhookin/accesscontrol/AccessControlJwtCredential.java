@@ -29,8 +29,6 @@ public class AccessControlJwtCredential extends CallCredentials {
   @Override
   public void applyRequestMetadata(final RequestInfo requestInfo, final Executor executor,
       final MetadataApplier metadataApplier) {
-    // Make a JWT compact serialized string.
-    // This example omits setting the expiration, but a real application should do it.
     final String jwt =
         Jwts.builder()
             .setId(UUID.randomUUID().toString())

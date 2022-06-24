@@ -3,7 +3,6 @@ package privacyhookin.accesscontrol;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -41,19 +40,18 @@ public class AccessControlPurposesParser {
     }
 
     public boolean isAllowedPurpose(String purpose, String clientId){
-        boolean allowed = true; // TODO: restore to false
-        ArrayNode allowedServices = ((ObjectNode) this.purposesConfig)._children
-                .get("purposes")
-                .get(purpose)
-                .get("allowed_services")._children;
-        // TODO: check if he is in the list of allowed services linked to the purpose
-        /*
-        for (Node allowedService: allowedServices) {
-            if(allowedService == clientId){
-                allowed = true;
+        // check if he is in the list of allowed services linked to the purpose
+        boolean allowed = false;
+        ArrayNode allowedServices = (ArrayNode) this.purposesConfig.get("purposes").get(purpose).get("allowed_services");
+        if (allowedServices.isArray()) {
+            for (JsonNode allowedService : allowedServices) {
+                String allowedServiceName = allowedService.asText();
+                if (clientId.equals(allowedServiceName)) {
+                    allowed = true;
+                    break;
+                }
             }
         }
-        */
         return allowed;
     }
 

@@ -20,7 +20,7 @@ public class DataMinimizer {
     HashMap<String, UnaryOperator<?>> functions = new HashMap<>();
 
     public DataMinimizer() {
-        functions.put("erasure", (value) -> null);
+        functions.put("erasure", (value)    -> null);
         // functions.put("noising", (value) -> noising(value));
     }
 
@@ -53,8 +53,6 @@ public class DataMinimizer {
     public static Object erasure(Object field){
         // TODO: Perform erasure of data field
         return field;
-        UnaryOperator<Integer>
-        (value) -> null
     }
 
     public static Object generalization(Object base, String field){

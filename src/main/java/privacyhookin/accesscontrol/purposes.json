@@ -3,7 +3,7 @@
     "meal_purchase": {
       "name": "Meal purchase",
       "allowed_services": [
-        "driver"
+        "client", "order"
       ],
       "minimization": {
         "MealOrderRequest": {
