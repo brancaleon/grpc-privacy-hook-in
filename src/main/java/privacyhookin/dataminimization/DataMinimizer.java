@@ -3,7 +3,7 @@ package privacyhookin.dataminimization;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.Descriptors;
-import com.peng.gprc_hook_in.common.Position;
+import com.google.protobuf.Message;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -11,64 +11,80 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.HashMap;
-import java.util.function.UnaryOperator;
+import java.util.Iterator;
+import java.util.Map;
 
 public class DataMinimizer {
+    private final HashMap<String, MinimizationFunction> functions = new HashMap<>();
+    private JsonNode config = null;
 
-    // TODO: add method for adding custom stuff
-    // TODO: implement the standard operators
-    HashMap<String, UnaryOperator<?>> functions = new HashMap<>();
-
-    public DataMinimizer() {
-        functions.put("erasure", (value)    -> null);
-        // functions.put("noising", (value) -> noising(value));
+    public DataMinimizer(String configPath) {
+        functions.put("erasure", new MinimizationFunction().addOperator((value, config) -> null));
+        functions.put("replace", new MinimizationFunction()
+                .addStringOperator((value, config) -> config.getOrDefault("replace", ""))
+                .addIntOperator((value, config) -> Integer.parseInt(config.getOrDefault("replace", "0")))
+                .addLongOperator((value, config) -> Long.parseLong(config.getOrDefault("replace", "0")))
+                .addBooleanOperator((value, config) -> config.getOrDefault("replace", "false").equals("true"))
+        );
+        parseConfig(configPath);
     }
 
-    public<ReqT> ReqT minimize(ReqT req){
-        String configFile = Paths.get(".").toAbsolutePath().normalize()
-                + "/src/main/java/privacyhookin/dataminimization/minimizations.json";
-        JsonNode config = parseConfig(configFile);
+    public void defineMinimizationFunction(String name, MinimizationFunction function) {
+        functions.put(name, function);
+    }
+
+    public <MessageT extends Message> MessageT minimize(MessageT req, String purpose) {
         String objectType = req.getClass().getSimpleName();
-        JsonNode requestObjectConfig = config.get(objectType);
-        // req.getField()
-        // Descriptors.FieldDescriptor fieldDescriptor = req.getDescriptorForType().findFieldByName("fieldXyz");
-        // Object value = message.getField(fieldDescriptor);
-        // TODO: Read config from file and apply functions to req object.
-        //  Config can be JSON file and should map proto fields (as defined in the .proto files)
-        //  to the data minimization functions to apply
-        // fields can be accessed in this way: ((OrderRequest) req).meal_ or ((OrderRequest) req).getMeal()
-        return req;
+        JsonNode purposeConfig = config.at("/purposes/" + purpose + "/minimization/" + objectType);
+        MessageT.Builder builder = req.toBuilder();
+        Iterator<Map.Entry<String, JsonNode>> fieldIterator = purposeConfig.fields();
+        while (fieldIterator.hasNext()) {
+            Map.Entry<String, JsonNode> field = fieldIterator.next();
+            Descriptors.FieldDescriptor fieldDescriptor = req.getDescriptorForType().findFieldByName(field.getKey());
+            Object value = req.getField(fieldDescriptor);
+            Iterator<JsonNode> operationIterator = field.getValue().elements();
+            while (operationIterator.hasNext()) {
+                JsonNode operation = operationIterator.next();
+                MinimizationFunction function = functions.getOrDefault(operation.get("function").asText(), null);
+                if (function != null) {
+                    Map<String, String> operationConfig = new HashMap<>();
+                    Iterator<Map.Entry<String, JsonNode>> configIterator = operation.fields();
+                    while (configIterator.hasNext()) {
+                        Map.Entry<String, JsonNode> config = configIterator.next();
+                        operationConfig.put(config.getKey(), config.getValue().asText());
+                    }
+                    value = function.apply(fieldDescriptor.getJavaType(), value, operationConfig);
+                }
+            }
+            builder.setField(fieldDescriptor, value);
+        }
+        return (MessageT) builder.build();
     }
-    public JsonNode parseConfig(String fileName) {
+
+    public void parseConfig(String fileName) {
         ObjectMapper mapper = new ObjectMapper();
         try {
             String content = new String(Files.readAllBytes(Paths.get(fileName)));
-            return mapper.readTree(content);
+            config = mapper.readTree(content);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
     }
 
-    public static Object erasure(Object field){
-        // TODO: Perform erasure of data field
-        return field;
-    }
-
-    public static Object generalization(Object base, String field){
+    public static Object generalization(Object base, String field) {
         // TODO: Perfom generalization of specified field
         //  Try to support different data types
         return base;
     }
 
-    public static Object noising(Object base, String field){
+    public static Object noising(Object base, String field) {
         // TODO: Perform noising of the specified field
         //  Try to support different data types
         return base;
     }
 
     public static String hashing(String base, String field) {
-        try{
+        try {
             final MessageDigest digest = MessageDigest.getInstance("SHA-256");
             final byte[] hash = digest.digest(base.getBytes(StandardCharsets.UTF_8));
             final StringBuilder hexString = new StringBuilder();
@@ -79,13 +95,13 @@ public class DataMinimizer {
                 hexString.append(hex);
             }
             return hexString.toString();
-        } catch(Exception ex){
+        } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    public static Float positionToDistance(Position position1, Position position2, String field){
-        // TODO: convert coordinates to distance
-        return 1F;
-    }
+//    public static Float positionToDistance(Position position1, Position position2, String field){
+//        // TODO: convert coordinates to distance
+//        return 1F;
+//    }
 }
