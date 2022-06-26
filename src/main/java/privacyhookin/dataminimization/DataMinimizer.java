@@ -36,6 +36,9 @@ public class DataMinimizer {
     public <MessageT extends Message> MessageT minimize(MessageT req, String purpose) {
         String objectType = req.getClass().getSimpleName();
         JsonNode purposeConfig = config.at("/purposes/" + purpose + "/minimization/" + objectType);
+        if (purposeConfig == null) {
+            return req;
+        }
         MessageT.Builder builder = req.toBuilder();
         Iterator<Map.Entry<String, JsonNode>> fieldIterator = purposeConfig.fields();
         while (fieldIterator.hasNext()) {
