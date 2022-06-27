@@ -59,7 +59,11 @@ public class DataMinimizer {
                     value = function.apply(fieldDescriptor.getJavaType(), value, operationConfig);
                 }
             }
-            builder.setField(fieldDescriptor, value);
+            if (value != null) {
+                builder.setField(fieldDescriptor, value);
+            } else {
+                builder.clearField(fieldDescriptor);
+            }
         }
         return (MessageT) builder.build();
     }
