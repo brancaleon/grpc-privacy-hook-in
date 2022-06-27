@@ -28,7 +28,7 @@ public class DataMinimizerInterceptor implements ServerInterceptor {
             @Override
             public void onMessage(ReqT req) {
                 String configPath = Paths.get(".").toAbsolutePath().normalize()
-                        + "/src/main/java/privacyhookin/dataminimization/minimizations.json";
+                        + "/src/main/java/privacyhookin/accesscontrol/purposes.json";
                 if (req instanceof Message) {
                     req = (ReqT) new DataMinimizer(configPath).minimize((Message) req, authorization.getPurposeOrNull());
                 }
