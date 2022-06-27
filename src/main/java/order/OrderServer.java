@@ -81,6 +81,8 @@ public class OrderServer {
     public void orderMeal(OrderRequest request, StreamObserver<ResultResponse> responseObserver) {
         // TODO: write order to db and get generated order id
         int orderId = 1;
+        System.out.println("Name: "+request.getName()); // Test output for minimization
+        System.out.println("Surname: "+request.getSurname());
         String meal = request.getMeal();
         // 1. Send meal info to restaurant for cooking
         ResultResponse mealReady = this.SendMealInfo(orderId, meal);

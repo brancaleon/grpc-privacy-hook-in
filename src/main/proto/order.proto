@@ -10,7 +10,7 @@ import "common.proto";
 
 message OrderRequest {
     string name = 1;
-    string surname = 2;
+    optional string surname = 2;
     string address = 3;
     string meal = 4;
 }

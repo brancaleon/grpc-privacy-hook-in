@@ -6,21 +6,16 @@
         "client", "order"
       ],
       "minimization": {
-        "MealOrderRequest": {
-          "name": [
-            {
-              "function": "erasure"
-            }
-          ],
+        "OrderRequest": {
           "surname": [
             {
-              "function": "generalize",
-              "range": 10
+              "function": "erasure"
             }
           ],
-          "address.longtitude": [
+          "name": [
             {
-              "function": "erasure"
+              "function": "replace",
+              "replace": "Mister X"
             }
           ]
         }
@@ -35,7 +30,7 @@
     "meal_cooking": {
       "name": "Meal cooking",
       "allowed_services": [
-        "restaurant"
+        "order"
       ]
     },
     "meal_collection": {
