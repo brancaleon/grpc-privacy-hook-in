@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.peng.gprc_hook_in.keyserver";
+option java_outer_classname = "KeyServerProto";
+option objc_class_prefix = "HLW";
+
+package proto;
+import "common.proto";
+
+message TokenVerificationRequest {
+    string token = 1;
+}
+
+service KeyServerService {
+    rpc VerifyToken (TokenVerificationRequest) returns (ResultResponse);
+}
