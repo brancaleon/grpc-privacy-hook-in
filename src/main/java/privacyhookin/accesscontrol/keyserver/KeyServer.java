@@ -1,18 +1,18 @@
 package privacyhookin.accesscontrol.keyserver;
 
-import com.peng.gprc_hook_in.common.ResultResponse;
+import client.Client;
+import com.google.protobuf.ByteString;
 import com.peng.gprc_hook_in.keyserver.KeyServerServiceGrpc;
-import com.peng.gprc_hook_in.keyserver.TokenVerificationRequest;
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
+import com.peng.gprc_hook_in.keyserver.PublicKeyRequest;
+import com.peng.gprc_hook_in.keyserver.PublicKeyResponse;
+import io.grpc.*;
 import io.grpc.stub.StreamObserver;
 import utils.ServicesParser;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
-
-import static com.peng.gprc_hook_in.common.Status.SUCCESS;
 
 public class KeyServer {
 
@@ -69,8 +69,19 @@ public class KeyServer {
   static class KeyServerImpl extends KeyServerServiceGrpc.KeyServerServiceImplBase {
 
     @Override
-    public void verifyToken(TokenVerificationRequest request, StreamObserver<ResultResponse> responseObserver) {
-      super.verifyToken(request, responseObserver);
+    public void getPublicKey(PublicKeyRequest request, StreamObserver<PublicKeyResponse> responseObserver) {
+      String client = request.getClient();
+      String keyPath = Paths.get(".").toAbsolutePath().normalize()
+              + String.format("/src/main/java/privacyhookin/accesscontrol/keyserver/keys/public_key_%s.der", client);
+      byte[] key;
+      try {
+        key = Files.readAllBytes(Paths.get(keyPath));
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+      PublicKeyResponse response = PublicKeyResponse.newBuilder().setKey(ByteString.copyFrom(key)).build();
+      responseObserver.onNext(response);
+      responseObserver.onCompleted();
     }
   }
 }

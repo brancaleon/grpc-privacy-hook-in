@@ -6,12 +6,15 @@ option java_outer_classname = "KeyServerProto";
 option objc_class_prefix = "HLW";
 
 package proto;
-import "common.proto";
 
-message TokenVerificationRequest {
-    string token = 1;
+message PublicKeyRequest {
+    string client = 1;
+}
+
+message PublicKeyResponse {
+    bytes key = 1;
 }
 
 service KeyServerService {
-    rpc VerifyToken (TokenVerificationRequest) returns (ResultResponse);
+    rpc GetPublicKey (PublicKeyRequest) returns (PublicKeyResponse);
 }
