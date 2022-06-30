@@ -14,17 +14,17 @@ public class Authorization {
     private String subject = null;
 
     public Authorization(Metadata metadata) {
-        String value = metadata.get(AccessControlUtils.AUTHORIZATION_METADATA_KEY);
+        String value = metadata.get(AccessControlClientCredentials.AUTHORIZATION_METADATA_KEY);
         if (value == null) {
             errorStatus = Status.UNAUTHENTICATED.withDescription("Authorization token is missing");
-        } else if (!value.startsWith(AccessControlUtils.BEARER_TYPE)) {
+        } else if (!value.startsWith(AccessControlClientCredentials.BEARER_TYPE)) {
             errorStatus = Status.UNAUTHENTICATED.withDescription("Unknown authorization type");
         } else {
             // remove authorization type prefix
-            String token = value.substring(AccessControlUtils.BEARER_TYPE.length()).trim();
+            String token = value.substring(AccessControlClientCredentials.BEARER_TYPE.length()).trim();
             try {
                 JwtParser parser = Jwts.parser().setSigningKey(
-                        AccessControlUtils.getPublicKey(metadata.get(AccessControlUtils.CLIENT_ID_METADATA_KEY))
+                        AccessControlClientCredentials.getPublicKey(metadata.get(AccessControlClientCredentials.CLIENT_ID_METADATA_KEY))
                 );
                 // verify token signature and parse claims
                 Jws<Claims> claims = parser.parseClaimsJws(token);

@@ -2,14 +2,9 @@ package routing;
 
 import com.peng.gprc_hook_in.common.Driver;
 import com.peng.gprc_hook_in.common.Position;
-import com.peng.gprc_hook_in.common.ResultResponse;
 import com.peng.gprc_hook_in.driver.AvailableDriversResponse;
-import com.peng.gprc_hook_in.driver.DriverAssignmentRequest;
 import com.peng.gprc_hook_in.driver.DriverListRequest;
 import com.peng.gprc_hook_in.driver.DriverServiceGrpc;
-import com.peng.gprc_hook_in.order.OrderRequest;
-import com.peng.gprc_hook_in.restaurant.MealOrderRequest;
-import com.peng.gprc_hook_in.restaurant.RestaurantServiceGrpc;
 import com.peng.gprc_hook_in.routing.DeliveryAddress;
 import com.peng.gprc_hook_in.routing.RouteResponse;
 import com.peng.gprc_hook_in.routing.RoutingRequest;
@@ -19,18 +14,14 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
-import privacyhookin.accesscontrol.AccessControlJwtCredential;
+import privacyhookin.accesscontrol.AccessControlClientCredentials;
 import privacyhookin.accesscontrol.AccessControlServerInterceptor;
-import privacyhookin.accesscontrol.AccessControlUtils;
 import privacyhookin.dataminimization.DataMinimizerInterceptor;
 import utils.ServicesParser;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
-
-import static com.peng.gprc_hook_in.common.Status.SUCCESS;
 
 public class RoutingServer {
 
@@ -98,7 +89,7 @@ public class RoutingServer {
               .usePlaintext().build();
       DriverServiceGrpc.DriverServiceBlockingStub driverStub = DriverServiceGrpc
               .newBlockingStub(channel)
-              .withCallCredentials(new AccessControlJwtCredential(clientId, "route_computation"));
+              .withCallCredentials(new AccessControlClientCredentials(clientId, "route_computation"));
       DriverListRequest driverListRequest = DriverListRequest.newBuilder().build();
       AvailableDriversResponse drivers = driverStub.getAvailableDrivers(driverListRequest);
       DeliveryAddress deliveryAddress = request.getAddress();

@@ -1,8 +1,7 @@
 package order;
 
-import privacyhookin.accesscontrol.AccessControlJwtCredential;
+import privacyhookin.accesscontrol.AccessControlClientCredentials;
 import privacyhookin.accesscontrol.AccessControlServerInterceptor;
-import privacyhookin.accesscontrol.AccessControlUtils;
 import privacyhookin.dataminimization.DataMinimizerInterceptor;
 import com.peng.gprc_hook_in.common.ResultResponse;
 import com.peng.gprc_hook_in.driver.DriverAssignmentRequest;
@@ -108,7 +107,7 @@ public class OrderServer {
               .usePlaintext().build();
       RestaurantServiceGrpc.RestaurantServiceBlockingStub restaurantStub = RestaurantServiceGrpc
               .newBlockingStub(channel)
-              .withCallCredentials(new AccessControlJwtCredential(clientId, "meal_cooking"));
+              .withCallCredentials(new AccessControlClientCredentials(clientId, "meal_cooking"));
       return restaurantStub.cookMeal(request);
     }
 

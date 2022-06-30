@@ -11,7 +11,7 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
-import privacyhookin.accesscontrol.AccessControlJwtCredential;
+import privacyhookin.accesscontrol.AccessControlClientCredentials;
 import privacyhookin.accesscontrol.AccessControlServerInterceptor;
 import privacyhookin.dataminimization.DataMinimizerInterceptor;
 import utils.ServicesParser;
@@ -101,7 +101,7 @@ public class RestaurantServer {
               .usePlaintext().build();
       DriverServiceGrpc.DriverServiceBlockingStub driverStub = DriverServiceGrpc
               .newBlockingStub(channel)
-              .withCallCredentials(new AccessControlJwtCredential(clientId, "meal_collection"));
+              .withCallCredentials(new AccessControlClientCredentials(clientId, "meal_collection"));
       ResultResponse response = driverStub.checkDriverId(driverRequest);
       ResultResponse reply = null;
       if (response.getStatus() == SUCCESS) {

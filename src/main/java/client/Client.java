@@ -5,7 +5,7 @@ import com.peng.gprc_hook_in.order.OrderRequest;
 import com.peng.gprc_hook_in.order.OrderServiceGrpc;
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
-import privacyhookin.accesscontrol.AccessControlJwtCredential;
+import privacyhookin.accesscontrol.AccessControlClientCredentials;
 import utils.ServicesParser;
 
 import java.nio.file.Paths;
@@ -35,7 +35,7 @@ public class Client {
             .usePlaintext().build();
     OrderServiceGrpc.OrderServiceBlockingStub orderStub = OrderServiceGrpc
             .newBlockingStub(channel)
-            .withCallCredentials(new AccessControlJwtCredential(clientId, "meal_purchase"));
+            .withCallCredentials(new AccessControlClientCredentials(clientId, "meal_purchase"));
     ResultResponse response = orderStub.orderMeal(request);
   }
 

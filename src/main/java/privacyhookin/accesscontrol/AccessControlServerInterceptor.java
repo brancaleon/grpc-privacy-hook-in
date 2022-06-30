@@ -2,7 +2,7 @@ package privacyhookin.accesscontrol;
 
 import io.grpc.*;
 
-import static privacyhookin.accesscontrol.AccessControlUtils.PURPOSES_FILE;
+import static privacyhookin.accesscontrol.AccessControlClientCredentials.PURPOSES_FILE;
 
 /**
  * This interceptor gets the JWT from the metadata, verifies it and sets the client identifier
@@ -20,7 +20,7 @@ public class AccessControlServerInterceptor implements ServerInterceptor {
             AccessControlPurposesParser acpp = new AccessControlPurposesParser(PURPOSES_FILE);
             if (acpp.isAllowedPurpose(authorization.getPurposeOrNull(), authorization.getSubjectOrNull())) {
                 // set client id into current context
-                Context ctx = Context.current().withValue(AccessControlUtils.CLIENT_ID_CONTEXT_KEY, authorization.getSubjectOrNull());
+                Context ctx = Context.current().withValue(AccessControlClientCredentials.CLIENT_ID_CONTEXT_KEY, authorization.getSubjectOrNull());
                 return Contexts.interceptCall(ctx, serverCall, metadata, serverCallHandler);
             }
             status = Status.UNAUTHENTICATED.withDescription("Client unauthorized for this purpose");
