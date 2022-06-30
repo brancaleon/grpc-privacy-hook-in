@@ -118,7 +118,9 @@ public class OrderServer {
               .forAddress(servicesParser.getHost("routing"),
                           servicesParser.getPort("routing"))
               .usePlaintext().build();
-      RoutingServiceGrpc.RoutingServiceBlockingStub routingStub = RoutingServiceGrpc.newBlockingStub(channel);
+      RoutingServiceGrpc.RoutingServiceBlockingStub routingStub = RoutingServiceGrpc
+              .newBlockingStub(channel)
+              .withCallCredentials(new AccessControlClientCredentials(clientId, "route_computation"));
       return routingStub.computeRoute(request);
     }
 
@@ -128,7 +130,9 @@ public class OrderServer {
               .forAddress(servicesParser.getHost("driver"),
                           servicesParser.getPort("driver"))
               .usePlaintext().build();
-      DriverServiceGrpc.DriverServiceBlockingStub driverStub = DriverServiceGrpc.newBlockingStub(channel);
+      DriverServiceGrpc.DriverServiceBlockingStub driverStub = DriverServiceGrpc
+              .newBlockingStub(channel)
+              .withCallCredentials(new AccessControlClientCredentials(clientId, "delivery_assignment"));
       return driverStub.assignDriver(request);
     }
 
