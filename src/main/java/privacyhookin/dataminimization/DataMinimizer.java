@@ -26,6 +26,9 @@ public class DataMinimizer {
                 .addLongOperator((value, config) -> Long.parseLong(config.getOrDefault("replace", "0")))
                 .addBooleanOperator((value, config) -> config.getOrDefault("replace", "false").equals("true"))
         );
+        // TODO: noising
+        // TODO: generalizing
+        // TODO: hashing
         parseConfig(configPath);
     }
 

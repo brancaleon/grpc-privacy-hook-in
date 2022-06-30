@@ -2,8 +2,11 @@
   "purposes": {
     "meal_purchase": {
       "name": "Meal purchase",
-      "allowed_services": [
+      "allowed_clients": [
         "client", "order"
+      ],
+      "allowed_services": [
+        "orderMeal"
       ],
       "minimization": {
         "OrderRequest": {
@@ -23,26 +26,35 @@
     },
     "meal_delivery": {
       "name": "Meal delivery",
-      "allowed_services": [
+      "allowed_clients": [
         "driver"
+      ],
+      "allowed_services": [
       ]
     },
     "meal_cooking": {
       "name": "Meal cooking",
-      "allowed_services": [
+      "allowed_clients": [
         "order"
+      ],
+      "allowed_services": [
+
       ]
     },
     "meal_collection": {
       "name": "Meal collection",
-      "allowed_services": [
+      "allowed_clients": [
         "restaurant"
+      ],
+      "allowed_services": [
       ]
     },
     "route_computation": {
       "name": "Route computation",
-      "allowed_services": [
+      "allowed_client": [
         "routing"
+      ],
+      "allowed_services": [
       ]
     }
   }

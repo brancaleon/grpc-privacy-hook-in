@@ -66,9 +66,9 @@ public class AccessControlPurposesParser {
     public boolean isAllowedPurpose(String purpose, String clientId){
         // check if he is in the list of allowed services linked to the purpose
         boolean allowed = false;
-        ArrayNode allowedServices = (ArrayNode) this.purposesConfig.get("purposes").get(purpose).get("allowed_services");
-        if (allowedServices.isArray()) {
-            for (JsonNode allowedService : allowedServices) {
+        ArrayNode allowedClients = (ArrayNode) this.purposesConfig.get("purposes").get(purpose).get("allowed_clients");
+        if (allowedClients.isArray()) {
+            for (JsonNode allowedService : allowedClients) {
                 String allowedServiceName = allowedService.asText();
                 if (clientId.equals(allowedServiceName)) {
                     allowed = true;

@@ -78,7 +78,7 @@ public class OrderServer {
 
     @Override
     public void orderMeal(OrderRequest request, StreamObserver<ResultResponse> responseObserver) {
-        // TODO: write order to db and get generated order id
+        // TODO: test entire application
         int orderId = 1;
         System.out.println("Name: "+request.getName()); // Test output for minimization
         System.out.println("Surname: "+request.getSurname());
@@ -92,8 +92,6 @@ public class OrderServer {
         ResultResponse deliveryAssigned = this.AssignDelivery(orderId, driverId);
         // 4. Receive confirmation from restaurant
         // 5. Receive confirmation from driver
-        // 6. Finalize order
-        // TODO: set order as completed
         ResultResponse reply = ResultResponse.newBuilder().setStatus(SUCCESS).build();
         responseObserver.onNext(reply);
         responseObserver.onCompleted();

@@ -23,6 +23,7 @@ public class Client {
   }
 
   public void test(){
+    // TODO: benchmarking 
     OrderRequest request = OrderRequest.newBuilder()
             .setName("Professor")
             .setSurname("Tai")

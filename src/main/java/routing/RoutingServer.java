@@ -100,12 +100,10 @@ public class RoutingServer {
     }
 
     public Driver findClosestDriver(AvailableDriversResponse drivers, DeliveryAddress deliveryAddress){
-      // TODO: implement
       return drivers.getDrivers(0);
     }
 
     public RouteResponse findRoute(Position position, DeliveryAddress deliveryAddress){
-      // TODO: implement
       return RouteResponse.newBuilder()
               .addRoute(Position.newBuilder().setLatitude(1).setLatitude(3))
               .addRoute(Position.newBuilder().setLatitude(5).setLatitude(8))
