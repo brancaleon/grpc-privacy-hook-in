@@ -6,3 +6,6 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+include ':hook-in'
+include ':delivery'
+

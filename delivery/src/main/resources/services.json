@@ -1,0 +1,22 @@
+{
+  "driver": {
+    "name": "Driver",
+    "host": "localhost",
+    "port": 50001
+  },
+  "order": {
+    "name": "Order",
+    "host": "localhost",
+    "port": 50002
+  },
+  "restaurant": {
+    "name": "Restaurant",
+    "host": "localhost",
+    "port": 50003
+  },
+  "routing": {
+    "name": "Routing",
+    "host": "localhost",
+    "port": 50004
+  }
+}
