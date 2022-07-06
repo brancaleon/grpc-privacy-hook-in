@@ -23,12 +23,15 @@ public class AccessControlServerInterceptor implements ServerInterceptor {
         Authorization authorization = new Authorization(metadata, config);
         Status status;
         if (authorization.getPurposeOrNull() != null) {
-            if (config.isAllowedPurpose(authorization.getPurposeOrNull(), authorization.getSubjectOrNull())) {
+            if (config.isClientRejectedForPurpose(authorization.getPurposeOrNull(), authorization.getSubjectOrNull())) {
+                status = Status.UNAUTHENTICATED.withDescription("Client unauthorized for this purpose");
+            } else if (config.isMethodRejectedForPurpose(authorization.getPurposeOrNull(), serverCall.getMethodDescriptor().getFullMethodName())) {
+                status = Status.UNAUTHENTICATED.withDescription("Requested method not allowed in this purpose");
+            } else {
                 // set client id into current context
                 Context ctx = Context.current().withValue(AccessControlClientCredentials.CLIENT_ID_CONTEXT_KEY, authorization.getSubjectOrNull());
                 return Contexts.interceptCall(ctx, serverCall, metadata, serverCallHandler);
             }
-            status = Status.UNAUTHENTICATED.withDescription("Client unauthorized for this purpose");
         } else {
             status = authorization.getErrorStatus();
         }
