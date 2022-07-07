@@ -49,22 +49,29 @@ public class DataMinimizer {
                     double variance = Double.parseDouble(config.getOrDefault("variance", "1.0"));
                     return value + new Random().nextGaussian() * Math.sqrt(variance);
                 }));
-        functions.put("hashing", new MinimizationFunction().addStringOperator((value, config) -> {
-            try {
-                final MessageDigest digest = MessageDigest.getInstance("SHA-256");
-                final byte[] hash = digest.digest(value.getBytes(StandardCharsets.UTF_8));
-                final StringBuilder hexString = new StringBuilder();
-                for (byte b : hash) {
-                    final String hex = Integer.toHexString(0xff & b);
-                    if (hex.length() == 1)
-                        hexString.append('0');
-                    hexString.append(hex);
-                }
-                return hexString.toString();
-            } catch (Exception ex) {
-                return "error";
-            }
-        }));
+        functions.put("hashing", new MinimizationFunction()
+                .addStringOperator((value, config) -> {
+                    try {
+                        final MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                        final byte[] hash = digest.digest(value.getBytes(StandardCharsets.UTF_8));
+                        final StringBuilder hexString = new StringBuilder();
+                        for (byte b : hash) {
+                            final String hex = Integer.toHexString(0xff & b);
+                            if (hex.length() == 1)
+                                hexString.append('0');
+                            hexString.append(hex);
+                        }
+                        return hexString.toString();
+                    } catch (Exception ex) {
+                        return "error";
+                    }
+                }));
+        functions.put("***", new MinimizationFunction()
+                .addStringOperator((value, config) -> {
+                    int hiddenPrefix = value.length() - Integer.parseInt(config.getOrDefault("readableEnd", "0"));
+                    return "*".repeat(hiddenPrefix) + value.substring(hiddenPrefix);
+                })
+        );
     }
 
     void defineMinimizationFunction(String name, MinimizationFunction function) {
