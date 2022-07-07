@@ -43,6 +43,7 @@
         "order"
       ],
       "allowed_services": [
+        "cookMeal"
       ]
     },
     "meal_collection": {
@@ -51,14 +52,26 @@
         "restaurant"
       ],
       "allowed_services": [
+        "checkDriverId"
       ]
     },
     "route_computation": {
       "name": "Route computation",
-      "allowed_client": [
+      "allowed_clients": [
+        "order",
         "routing"
       ],
       "allowed_services": [
+        "computeRoute"
+      ]
+    },
+    "delivery_assignment": {
+      "name": "Delivery assignment",
+      "allowed_clients": [
+        "order"
+      ],
+      "allowed_services": [
+        "assignDelivery"
       ]
     }
   }

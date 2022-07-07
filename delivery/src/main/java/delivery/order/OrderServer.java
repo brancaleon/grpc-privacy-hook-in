@@ -2,18 +2,17 @@ package delivery.order;
 
 import accesscontrol.AccessControlServerInterceptor;
 import clientside.AccessControlClientCredentials;
+import com.peng.gprc_hook_in.common.Driver;
 import com.peng.gprc_hook_in.common.ResultResponse;
 import com.peng.gprc_hook_in.driver.DriverAssignmentRequest;
 import com.peng.gprc_hook_in.driver.DriverServiceGrpc;
 import com.peng.gprc_hook_in.order.OrderRequest;
 import com.peng.gprc_hook_in.order.OrderServiceGrpc;
-import com.peng.gprc_hook_in.restaurant.MealOrderRequest;
 import com.peng.gprc_hook_in.restaurant.RestaurantServiceGrpc;
-import com.peng.gprc_hook_in.routing.DeliveryAddress;
 import com.peng.gprc_hook_in.routing.RouteResponse;
-import com.peng.gprc_hook_in.routing.RoutingRequest;
 import com.peng.gprc_hook_in.routing.RoutingServiceGrpc;
 import dataminimization.DataMinimizerInterceptor;
+import delivery.driver.DriverServer;
 import delivery.utils.ServicesParser;
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
@@ -86,19 +85,19 @@ public class OrderServer {
     static class OrderImpl extends OrderServiceGrpc.OrderServiceImplBase {
 
         @Override
-        public void orderMeal(OrderRequest request, StreamObserver<ResultResponse> responseObserver) {
+        public void orderMeal(OrderRequest orderRequest, StreamObserver<ResultResponse> responseObserver) {
             // TODO: test entire application
             int orderId = 1;
 //            System.out.println("Name: " + request.getName()); // Test output for minimization
 //            System.out.println("Surname: " + request.getSurname());
-            String meal = request.getMeal();
+            String meal = orderRequest.getMeal();
 //             1. Send meal info to restaurant for cooking
-            ResultResponse mealReady = this.SendMealInfo(orderId, meal);
+            ResultResponse mealReady = this.SendMealInfo(orderRequest);
             // 2. Find route through RoutingService
-            RouteResponse routeInfo = this.FindRoute(request.getAddress());
-            String driverId = routeInfo.getChosenDriver().getId();
+            RouteResponse routeInfo = this.FindRoute(orderRequest);
+            Driver driver = routeInfo.getChosenDriver();
             // 3. Assign delivery
-            ResultResponse deliveryAssigned = this.AssignDelivery(orderId, driverId);
+            ResultResponse deliveryAssigned = this.AssignDelivery(orderRequest, driver);
             // 4. Receive confirmation from restaurant
             // 5. Receive confirmation from driver
             ResultResponse reply = ResultResponse.newBuilder().setStatus(SUCCESS).build();
@@ -106,8 +105,7 @@ public class OrderServer {
             responseObserver.onCompleted();
         }
 
-        public ResultResponse SendMealInfo(int orderId, String meal) {
-            MealOrderRequest request = MealOrderRequest.newBuilder().setId(orderId).setMeal(meal).build();
+        public ResultResponse SendMealInfo(OrderRequest orderRequest) {
             Channel channel = ManagedChannelBuilder
                     .forAddress(servicesParser.getHost("restaurant"),
                             servicesParser.getPort("restaurant"))
@@ -115,12 +113,10 @@ public class OrderServer {
             RestaurantServiceGrpc.RestaurantServiceBlockingStub restaurantStub = RestaurantServiceGrpc
                     .newBlockingStub(channel)
                     .withCallCredentials(new AccessControlClientCredentials(clientId, "meal_cooking", PRIVATE_KEY_PATH));
-            return restaurantStub.cookMeal(request);
+            return restaurantStub.cookMeal(orderRequest);
         }
 
-        public RouteResponse FindRoute(String address) {
-            DeliveryAddress deliveryAddress = DeliveryAddress.newBuilder().setAddress(address).build();
-            RoutingRequest request = RoutingRequest.newBuilder().setAddress(deliveryAddress).build();
+        public RouteResponse FindRoute(OrderRequest orderRequest) {
             Channel channel = ManagedChannelBuilder
                     .forAddress(servicesParser.getHost("routing"),
                             servicesParser.getPort("routing"))
@@ -128,11 +124,13 @@ public class OrderServer {
             RoutingServiceGrpc.RoutingServiceBlockingStub routingStub = RoutingServiceGrpc
                     .newBlockingStub(channel)
                     .withCallCredentials(new AccessControlClientCredentials(clientId, "route_computation", PRIVATE_KEY_PATH));
-            return routingStub.computeRoute(request);
+            return routingStub.computeRoute(orderRequest);
         }
 
-        public ResultResponse AssignDelivery(int orderId, String driverId) {
-            DriverAssignmentRequest request = DriverAssignmentRequest.newBuilder().setOrderId(orderId).setDriverId(driverId).build();
+        public ResultResponse AssignDelivery(OrderRequest orderRequest, Driver driver) {
+            DriverAssignmentRequest request = DriverAssignmentRequest.newBuilder()
+                    .setOrderRequest(orderRequest)
+                    .setDriver(driver).build();
             Channel channel = ManagedChannelBuilder
                     .forAddress(servicesParser.getHost("driver"),
                             servicesParser.getPort("driver"))

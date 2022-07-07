@@ -7,21 +7,14 @@ option objc_class_prefix = "HLW";
 
 package proto;
 import "common.proto";
-
-message MealOrderRequest {
-    int32 id = 1;
-    string name = 2;
-    string surname = 3;
-    string address = 4;
-    string meal = 5;
-}
+import "order.proto";
 
 message CollectMealRequest {
-    string driverId = 1;
-    int32 orderId = 2;
+    Driver driver = 1;
+    OrderRequest orderRequest = 2;
 }
 
 service RestaurantService {
-    rpc CookMeal (MealOrderRequest) returns (ResultResponse);
+    rpc CookMeal (OrderRequest) returns (ResultResponse);
     rpc CollectMeal (CollectMealRequest) returns (ResultResponse);
 }
