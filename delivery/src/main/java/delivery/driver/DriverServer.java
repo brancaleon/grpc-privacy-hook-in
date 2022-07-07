@@ -103,9 +103,6 @@ public class DriverServer {
 
         @Override
         public void checkDriverId(DriverCheckRequest request, StreamObserver<ResultResponse> responseObserver) {
-            // TODO: really check that driver is linked to that order
-            //  retrieve order on db by id
-            //  extract driver_id assigned to order
             String orderDriverId = "1";
             ResultResponse reply = null;
             if (request.getDriver().getId().equals(orderDriverId)) {

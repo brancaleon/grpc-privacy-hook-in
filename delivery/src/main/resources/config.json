@@ -43,6 +43,7 @@
         "order"
       ],
       "allowed_methods": [
+        "proto.RestaurantService/CookMeal"
       ]
     },
     "meal_collection": {
@@ -51,7 +52,7 @@
         "restaurant"
       ],
       "allowed_methods": [
-        "checkDriverId"
+        "proto.DriverService/CheckDriverId"
       ]
     },
     "route_computation": {
@@ -61,7 +62,8 @@
         "routing"
       ],
       "allowed_methods": [
-        "computeRoute"
+        "proto.RoutingService/ComputeRoute",
+        "proto.DriverService/GetAvailableDrivers"
       ]
     },
     "delivery_assignment": {
@@ -70,7 +72,7 @@
         "order"
       ],
       "allowed_methods": [
-        "assignDelivery"
+        "proto.DriverService/AssignDriver"
       ]
     }
   }

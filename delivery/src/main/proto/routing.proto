@@ -11,9 +11,9 @@ import "order.proto";
 
 message DeliveryAddress{
     string address = 1;
-    optional string city = 3;
-    optional string zip = 4;
-    optional string country = 5;
+    string city = 3;
+    string zip = 4;
+    string country = 5;
 }
 
 message RouteResponse{

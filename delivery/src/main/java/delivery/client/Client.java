@@ -2,6 +2,7 @@ package delivery.client;
 
 import clientside.AccessControlClientCredentials;
 import com.peng.gprc_hook_in.common.ResultResponse;
+import com.peng.gprc_hook_in.common.Status;
 import com.peng.gprc_hook_in.order.OrderRequest;
 import com.peng.gprc_hook_in.order.OrderServiceGrpc;
 import delivery.utils.ServicesParser;
@@ -24,6 +25,7 @@ public class Client {
 
     public void test() {
         // TODO: benchmarking
+        System.out.println("Order start");
         String keyPath = Paths.get(".").toAbsolutePath().normalize() + "/delivery/src/main/resources/privateKeys/private_key_client.der";
         OrderRequest request = OrderRequest.newBuilder()
                 .setName("Professor")
@@ -39,6 +41,9 @@ public class Client {
                 .newBlockingStub(channel)
                 .withCallCredentials(new AccessControlClientCredentials(clientId, "meal_purchase", keyPath));
         ResultResponse response = orderStub.orderMeal(request);
+        if (response.getStatus() == Status.SUCCESS){
+            System.out.println("Order completed and delivered successfully");
+        }
     }
 
     public static void main(String[] args) {

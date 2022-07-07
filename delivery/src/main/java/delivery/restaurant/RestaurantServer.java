@@ -82,11 +82,13 @@ public class RestaurantServer {
     static class RestaurantImpl extends RestaurantServiceGrpc.RestaurantServiceImplBase {
         @Override
         public void cookMeal(OrderRequest request, StreamObserver<ResultResponse> responseObserver) {
+            /*
             try {
                 TimeUnit.SECONDS.sleep(2);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+             */
             ResultResponse reply = ResultResponse.newBuilder().setStatus(SUCCESS).addMessages("Meal is ready").build();
             responseObserver.onNext(reply);
             responseObserver.onCompleted();

@@ -82,8 +82,6 @@ public class RoutingServer {
         @Override
         public void computeRoute(OrderRequest request, StreamObserver<RouteResponse> responseObserver) {
             String privateKeyPath = Paths.get(".").toAbsolutePath().normalize() + "/delivery/src/main/resources/privateKeys/private_key_routing.der";
-            // TODO: choose the closest driver and compute the route for him
-            //  Retrieve list of available drivers
             Channel channel = ManagedChannelBuilder
                     .forAddress(servicesParser.getHost("driver"),
                             servicesParser.getPort("driver"))
