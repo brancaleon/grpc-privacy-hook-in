@@ -10,6 +10,7 @@ import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 
 public class DataMinimizer {
     private final HashMap<String, MinimizationFunction> functions = new HashMap<>();
@@ -24,9 +25,46 @@ public class DataMinimizer {
                 .addLongOperator((value, config) -> Long.parseLong(config.getOrDefault("replace", "0")))
                 .addBooleanOperator((value, config) -> config.getOrDefault("replace", "false").equals("true"))
         );
-        // TODO: noising
-        // TODO: generalizing
-        // TODO: hashing
+        functions.put("generalize", new MinimizationFunction()
+                .addIntOperator((value, config) -> {
+                    int offset = Integer.parseInt(config.getOrDefault("offset", "0"));
+                    int binSize = Integer.parseInt(config.getOrDefault("binSize", "10"));
+                    int representerOffset = Integer.parseInt(config.getOrDefault("representerOffset", "0"));
+                    return value - ((value - offset) % binSize) + representerOffset;
+                })
+                .addLongOperator((value, config) -> {
+                    long offset = Long.parseLong(config.getOrDefault("offset", "0"));
+                    long binSize = Long.parseLong(config.getOrDefault("binSize", "10"));
+                    long representerOffset = Long.parseLong(config.getOrDefault("representerOffset", "0"));
+                    return value - ((value - offset) % binSize) + representerOffset;
+                })
+                .addDoubleOperator((value, config) -> {
+                    double offset = Double.parseDouble(config.getOrDefault("offset", "0.0"));
+                    double binSize = Double.parseDouble(config.getOrDefault("binSize", "10.0"));
+                    double representerOffset = Double.parseDouble(config.getOrDefault("representerOffset", "0.0"));
+                    return value - ((value - offset) % binSize) + representerOffset;
+                }));
+        functions.put("gaussianNoise", new MinimizationFunction()
+                .addDoubleOperator((value, config) -> {
+                    double variance = Double.parseDouble(config.getOrDefault("variance", "1.0"));
+                    return value + new Random().nextGaussian() * Math.sqrt(variance);
+                }));
+        functions.put("hashing", new MinimizationFunction().addStringOperator((value, config) -> {
+            try {
+                final MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                final byte[] hash = digest.digest(value.getBytes(StandardCharsets.UTF_8));
+                final StringBuilder hexString = new StringBuilder();
+                for (byte b : hash) {
+                    final String hex = Integer.toHexString(0xff & b);
+                    if (hex.length() == 1)
+                        hexString.append('0');
+                    hexString.append(hex);
+                }
+                return hexString.toString();
+            } catch (Exception ex) {
+                return "error";
+            }
+        }));
     }
 
     void defineMinimizationFunction(String name, MinimizationFunction function) {
@@ -67,38 +105,4 @@ public class DataMinimizer {
         }
         return (MessageT) builder.build();
     }
-
-    public static Object generalization(Object base, String field) {
-        // TODO: Perfom generalization of specified field
-        //  Try to support different data types
-        return base;
-    }
-
-    public static Object noising(Object base, String field) {
-        // TODO: Perform noising of the specified field
-        //  Try to support different data types
-        return base;
-    }
-
-    public static String hashing(String base, String field) {
-        try {
-            final MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            final byte[] hash = digest.digest(base.getBytes(StandardCharsets.UTF_8));
-            final StringBuilder hexString = new StringBuilder();
-            for (byte b : hash) {
-                final String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1)
-                    hexString.append('0');
-                hexString.append(hex);
-            }
-            return hexString.toString();
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-//    public static Float positionToDistance(Position position1, Position position2, String field){
-//        // TODO: convert coordinates to distance
-//        return 1F;
-//    }
 }

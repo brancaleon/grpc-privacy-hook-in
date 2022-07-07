@@ -34,20 +34,24 @@ public class ConfigParser {
         return purposesConfig.at("/key_server/port").asInt();
     }
 
-    public boolean isAllowedPurpose(String purpose, String clientId) {
-        // check if he is in the list of allowed services linked to the purpose
-        boolean allowed = false;
-        ArrayNode allowedClients = (ArrayNode) this.purposesConfig.get("purposes").get(purpose).get("allowed_clients");
-        if (allowedClients.isArray()) {
-            for (JsonNode allowedClient : allowedClients) {
-                String allowedServiceName = allowedClient.asText();
-                if (clientId.equals(allowedServiceName)) {
-                    allowed = true;
-                    break;
+    public boolean isClientRejectedForPurpose(String purpose, String clientId) {
+        return isRejectedForPurpose(purpose, clientId, "allowed_clients");
+    }
+
+    public boolean isMethodRejectedForPurpose(String purpose, String methodName) {
+        return isRejectedForPurpose(purpose, methodName, "allowed_methods");
+    }
+
+    private boolean isRejectedForPurpose(String purpose, String givenValue, String jsonKeyword) {
+        ArrayNode allowedValues = (ArrayNode) purposesConfig.get("purposes").get(purpose).get(jsonKeyword);
+        if (allowedValues.isArray()) {
+            for (JsonNode allowedValue : allowedValues) {
+                if (givenValue.equals(allowedValue.asText())) {
+                    return false;
                 }
             }
         }
-        return allowed;
+        return true;
     }
 
 }

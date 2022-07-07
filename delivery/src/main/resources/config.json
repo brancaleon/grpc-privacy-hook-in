@@ -10,8 +10,8 @@
         "client",
         "order"
       ],
-      "allowed_services": [
-        "orderMeal"
+      "allowed_methods": [
+        "proto.OrderService/OrderMeal"
       ],
       "minimization": {
         "OrderRequest": {
@@ -34,7 +34,7 @@
       "allowed_clients": [
         "driver"
       ],
-      "allowed_services": [
+      "allowed_methods": [
       ]
     },
     "meal_cooking": {
@@ -42,8 +42,7 @@
       "allowed_clients": [
         "order"
       ],
-      "allowed_services": [
-        "cookMeal"
+      "allowed_methods": [
       ]
     },
     "meal_collection": {
@@ -51,7 +50,7 @@
       "allowed_clients": [
         "restaurant"
       ],
-      "allowed_services": [
+      "allowed_methods": [
         "checkDriverId"
       ]
     },
@@ -61,7 +60,7 @@
         "order",
         "routing"
       ],
-      "allowed_services": [
+      "allowed_methods": [
         "computeRoute"
       ]
     },
@@ -70,7 +69,7 @@
       "allowed_clients": [
         "order"
       ],
-      "allowed_services": [
+      "allowed_methods": [
         "assignDelivery"
       ]
     }
