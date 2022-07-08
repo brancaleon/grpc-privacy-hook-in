@@ -7,10 +7,9 @@ import com.google.protobuf.Message;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class DataMinimizer {
     private final HashMap<String, MinimizationFunction> functions = new HashMap<>();
@@ -78,38 +77,52 @@ public class DataMinimizer {
         functions.put(name, function);
     }
 
-    public <MessageT extends Message> MessageT minimize(MessageT req, String purpose) {
-        String objectType = req.getClass().getSimpleName();
+    public <MessageT extends Message> MessageT minimize(MessageT message, String purpose) {
+        String objectType = message.getClass().getSimpleName();
         JsonNode purposeConfig = config.at("/purposes/" + purpose + "/minimization/" + objectType);
         if (purposeConfig == null) {
-            return req;
+            return message;
         }
-        MessageT.Builder builder = req.toBuilder();
+        MessageT.Builder builder = message.toBuilder();
         Iterator<Map.Entry<String, JsonNode>> fieldIterator = purposeConfig.fields();
         while (fieldIterator.hasNext()) {
             Map.Entry<String, JsonNode> field = fieldIterator.next();
-            Descriptors.FieldDescriptor fieldDescriptor = req.getDescriptorForType().findFieldByName(field.getKey());
-            Object value = req.getField(fieldDescriptor);
-            Iterator<JsonNode> operationIterator = field.getValue().elements();
-            while (operationIterator.hasNext()) {
-                JsonNode operation = operationIterator.next();
-                MinimizationFunction function = functions.getOrDefault(operation.get("function").asText(), null);
-                if (function != null) {
-                    Map<String, String> operationConfig = new HashMap<>();
-                    Iterator<Map.Entry<String, JsonNode>> configIterator = operation.fields();
-                    while (configIterator.hasNext()) {
-                        Map.Entry<String, JsonNode> config = configIterator.next();
-                        operationConfig.put(config.getKey(), config.getValue().asText());
-                    }
-                    value = function.apply(fieldDescriptor.getJavaType(), value, operationConfig);
-                }
-            }
-            if (value != null) {
-                builder.setField(fieldDescriptor, value);
-            } else {
+            Descriptors.FieldDescriptor fieldDescriptor = message.getDescriptorForType().findFieldByName(field.getKey());
+            if (fieldDescriptor.isRepeated()) {
+                List<Object> values = IntStream.range(0, message.getRepeatedFieldCount(fieldDescriptor))
+                        .mapToObj(i -> message.getRepeatedField(fieldDescriptor, i))
+                        .map(value -> applyOperation(fieldDescriptor, value, field.getValue().elements()))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
                 builder.clearField(fieldDescriptor);
+                values.forEach(value -> builder.addRepeatedField(fieldDescriptor, value));
+            } else {
+                Object value = message.getField(fieldDescriptor);
+                value = applyOperation(fieldDescriptor, value, field.getValue().elements());
+                if (value != null) {
+                    builder.setField(fieldDescriptor, value);
+                } else {
+                    builder.clearField(fieldDescriptor);
+                }
             }
         }
         return (MessageT) builder.build();
+    }
+
+    private Object applyOperation(Descriptors.FieldDescriptor fieldDescriptor, Object value, Iterator<JsonNode> operationIterator) {
+        while (operationIterator.hasNext()) {
+            JsonNode operation = operationIterator.next();
+            MinimizationFunction function = functions.getOrDefault(operation.get("function").asText(), null);
+            if (function != null) {
+                Map<String, String> operationConfig = new HashMap<>();
+                Iterator<Map.Entry<String, JsonNode>> configIterator = operation.fields();
+                while (configIterator.hasNext()) {
+                    Map.Entry<String, JsonNode> config = configIterator.next();
+                    operationConfig.put(config.getKey(), config.getValue().asText());
+                }
+                value = function.apply(fieldDescriptor.getJavaType(), value, operationConfig);
+            }
+        }
+        return value;
     }
 }
