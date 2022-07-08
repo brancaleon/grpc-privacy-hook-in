@@ -11,11 +11,15 @@ public class DataMinimizerInterceptor implements ServerInterceptor {
     private final DataMinimizer minimizer;
     private final String keyServerHost;
     private final int keyServerPort;
+    private final boolean interceptRequest;
+    private final boolean interceptResponse;
 
-    protected DataMinimizerInterceptor(DataMinimizer minimizer, String keyServerHost, int keyServerPort) {
+    protected DataMinimizerInterceptor(DataMinimizer minimizer, String keyServerHost, int keyServerPort, boolean interceptRequest, boolean interceptResponse) {
         this.minimizer = minimizer;
         this.keyServerHost = keyServerHost;
         this.keyServerPort = keyServerPort;
+        this.interceptRequest = interceptRequest;
+        this.interceptResponse = interceptResponse;
     }
 
     @Override
@@ -30,24 +34,30 @@ public class DataMinimizerInterceptor implements ServerInterceptor {
                 // noop
             };
         }
-        ServerCall.Listener<ReqT> listener = serverCallHandler.startCall(new ForwardingServerCall.SimpleForwardingServerCall<>(serverCall) {
-            @Override
-            public void sendMessage(RespT message) {
-                if (message instanceof Message) {
-                    message = (RespT) minimizer.minimize((Message) message, authorization.getPurposeOrNull());
+        if (interceptResponse) {
+            serverCall = new ForwardingServerCall.SimpleForwardingServerCall<>(serverCall) {
+                @Override
+                public void sendMessage(RespT message) {
+                    if (message instanceof Message) {
+                        message = (RespT) minimizer.minimize((Message) message, authorization.getPurposeOrNull());
+                    }
+                    super.sendMessage(message);
                 }
-                super.sendMessage(message);
-            }
-        }, metadata);
-        return new SimpleForwardingServerCallListener<>(listener) {
-            @Override
-            public void onMessage(ReqT req) {
-                if (req instanceof Message) {
-                    req = (ReqT) minimizer.minimize((Message) req, authorization.getPurposeOrNull());
+            };
+        }
+        ServerCall.Listener<ReqT> listener = serverCallHandler.startCall(serverCall, metadata);
+        if (interceptRequest) {
+            listener = new SimpleForwardingServerCallListener<>(listener) {
+                @Override
+                public void onMessage(ReqT req) {
+                    if (req instanceof Message) {
+                        req = (ReqT) minimizer.minimize((Message) req, authorization.getPurposeOrNull());
+                    }
+                    super.onMessage(req);
                 }
-                super.onMessage(req);
-            }
-        };
+            };
+        }
+        return listener;
     }
 
     public static DataMinimizerInterceptor.Builder newBuilder(String configPath) {
@@ -59,6 +69,8 @@ public class DataMinimizerInterceptor implements ServerInterceptor {
 
         private DataMinimizer minimizer;
         private ConfigParser config;
+        private boolean interceptRequest = true;
+        private boolean interceptResponse = true;
 
         private Builder(String configPath) {
             config = new ConfigParser(configPath);
@@ -70,9 +82,19 @@ public class DataMinimizerInterceptor implements ServerInterceptor {
             return this;
         }
 
+        public DataMinimizerInterceptor.Builder withoutRequestIntercepting() {
+            interceptRequest = false;
+            return this;
+        }
+
+        public DataMinimizerInterceptor.Builder withoutResponseIntercepting() {
+            interceptResponse = false;
+            return this;
+        }
+
         public DataMinimizerInterceptor build() {
             minimizer.loadConfig(config);
-            return new DataMinimizerInterceptor(minimizer, config.getKeyServerHost(), config.getKeyServerPort());
+            return new DataMinimizerInterceptor(minimizer, config.getKeyServerHost(), config.getKeyServerPort(), interceptRequest, interceptResponse);
         }
     }
 }
