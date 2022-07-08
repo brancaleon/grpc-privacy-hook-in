@@ -13,10 +13,10 @@ import java.util.stream.IntStream;
 
 public class DataMinimizer {
     private final HashMap<String, MinimizationFunction> functions = new HashMap<>();
-    private final JsonNode config;
+    private final Map<String, Map<String, Map<String, List<ConcreteMinimizationFunction>>>> config = new HashMap<>();
+    // Purpose -> Message -> Field -> Functions
 
-    public DataMinimizer(ConfigParser configParser) {
-        config = configParser.getJson();
+    public DataMinimizer() {
         functions.put("erasure", new MinimizationFunction().addOperator((value, config) -> null));
         functions.put("replace", new MinimizationFunction()
                 .addStringOperator((value, config) -> config.getOrDefault("replace", ""))
@@ -73,32 +73,59 @@ public class DataMinimizer {
         );
     }
 
+    void loadConfig(ConfigParser json) {
+        Iterator<Map.Entry<String, JsonNode>> purposes = json.getJson().at("/purposes").fields();
+        while (purposes.hasNext()) {
+            Map.Entry<String, JsonNode> purpose = purposes.next();
+            config.put(purpose.getKey(), new HashMap<>());
+            JsonNode minimization = purpose.getValue().at("/minimization");
+            if (minimization != null) {
+                Iterator<Map.Entry<String, JsonNode>> messages = minimization.fields();
+                while (messages.hasNext()) {
+                    Map.Entry<String, JsonNode> message = messages.next();
+                    config.get(purpose.getKey()).put(message.getKey(), new HashMap<>());
+                    Iterator<Map.Entry<String, JsonNode>> fields = message.getValue().fields();
+                    while (fields.hasNext()) {
+                        Map.Entry<String, JsonNode> field = fields.next();
+                        config.get(purpose.getKey()).get(message.getKey()).put(field.getKey(), new LinkedList<>());
+                        Iterator<JsonNode> operations = field.getValue().elements();
+                        while (operations.hasNext()) {
+                            Map<String, String> parameters = new HashMap<>();
+                            Iterator<Map.Entry<String, JsonNode>> configIterator = operations.next().fields();
+                            while (configIterator.hasNext()) {
+                                Map.Entry<String, JsonNode> config = configIterator.next();
+                                parameters.put(config.getKey(), config.getValue().asText());
+                            }
+                            ConcreteMinimizationFunction concreteFunction = functions.get(parameters.get("function")).getConfiguredInstance(parameters);
+                            config.get(purpose.getKey()).get(message.getKey()).get(field.getKey()).add(concreteFunction);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     void defineMinimizationFunction(String name, MinimizationFunction function) {
         functions.put(name, function);
     }
 
     public <MessageT extends Message> MessageT minimize(MessageT message, String purpose) {
-        String objectType = message.getClass().getSimpleName();
-        JsonNode purposeConfig = config.at("/purposes/" + purpose + "/minimization/" + objectType);
-        if (purposeConfig == null) {
-            return message;
-        }
+        String messageType = message.getClass().getSimpleName();
+        Map<String, List<ConcreteMinimizationFunction>> messageConfig = config.get(purpose).get(messageType);
         MessageT.Builder builder = message.toBuilder();
-        Iterator<Map.Entry<String, JsonNode>> fieldIterator = purposeConfig.fields();
-        while (fieldIterator.hasNext()) {
-            Map.Entry<String, JsonNode> field = fieldIterator.next();
-            Descriptors.FieldDescriptor fieldDescriptor = message.getDescriptorForType().findFieldByName(field.getKey());
+        for (String fieldName : messageConfig.keySet()) {
+            Descriptors.FieldDescriptor fieldDescriptor = message.getDescriptorForType().findFieldByName(fieldName);
             if (fieldDescriptor.isRepeated()) {
                 List<Object> values = IntStream.range(0, message.getRepeatedFieldCount(fieldDescriptor))
                         .mapToObj(i -> message.getRepeatedField(fieldDescriptor, i))
-                        .map(value -> applyOperation(fieldDescriptor, value, field.getValue().elements()))
+                        .map(value -> applyOperation(fieldDescriptor, value, messageConfig.get(fieldName)))
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
                 builder.clearField(fieldDescriptor);
                 values.forEach(value -> builder.addRepeatedField(fieldDescriptor, value));
             } else {
                 Object value = message.getField(fieldDescriptor);
-                value = applyOperation(fieldDescriptor, value, field.getValue().elements());
+                value = applyOperation(fieldDescriptor, value, messageConfig.get(fieldName));
                 if (value != null) {
                     builder.setField(fieldDescriptor, value);
                 } else {
@@ -109,19 +136,9 @@ public class DataMinimizer {
         return (MessageT) builder.build();
     }
 
-    private Object applyOperation(Descriptors.FieldDescriptor fieldDescriptor, Object value, Iterator<JsonNode> operationIterator) {
-        while (operationIterator.hasNext()) {
-            JsonNode operation = operationIterator.next();
-            MinimizationFunction function = functions.getOrDefault(operation.get("function").asText(), null);
-            if (function != null) {
-                Map<String, String> operationConfig = new HashMap<>();
-                Iterator<Map.Entry<String, JsonNode>> configIterator = operation.fields();
-                while (configIterator.hasNext()) {
-                    Map.Entry<String, JsonNode> config = configIterator.next();
-                    operationConfig.put(config.getKey(), config.getValue().asText());
-                }
-                value = function.apply(fieldDescriptor.getJavaType(), value, operationConfig);
-            }
+    private Object applyOperation(Descriptors.FieldDescriptor fieldDescriptor, Object value, List<ConcreteMinimizationFunction> operations) {
+        for (ConcreteMinimizationFunction operation : operations) {
+            value = operation.apply(fieldDescriptor.getJavaType(), value);
         }
         return value;
     }

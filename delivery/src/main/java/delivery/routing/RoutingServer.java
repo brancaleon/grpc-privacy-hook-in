@@ -44,7 +44,7 @@ public class RoutingServer {
         String configPath = Paths.get(".").toAbsolutePath().normalize() + "/delivery/src/main/resources/config.json";
         server = ServerBuilder.forPort(this.port)
                 .addService(new RoutingImpl())
-                .intercept(new DataMinimizerInterceptor(configPath))
+                .intercept(DataMinimizerInterceptor.newBuilder(configPath).build())
                 .intercept(new AccessControlServerInterceptor(configPath))
                 .build()
                 .start();

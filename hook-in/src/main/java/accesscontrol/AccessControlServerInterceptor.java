@@ -20,7 +20,7 @@ public class AccessControlServerInterceptor implements ServerInterceptor {
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> serverCall,
                                                                  Metadata metadata, ServerCallHandler<ReqT, RespT> serverCallHandler) {
-        Authorization authorization = new Authorization(metadata, config);
+        Authorization authorization = new Authorization(metadata, config.getKeyServerHost(), config.getKeyServerPort());
         Status status;
         if (authorization.getPurposeOrNull() != null) {
             if (config.isClientRejectedForPurpose(authorization.getPurposeOrNull(), authorization.getSubjectOrNull())) {

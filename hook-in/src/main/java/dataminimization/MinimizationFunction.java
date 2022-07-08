@@ -76,4 +76,8 @@ public class MinimizationFunction {
         return ((ConfigurableOperator<T>) operators.get(type)).apply((T) value, config);
     }
 
+    public ConcreteMinimizationFunction getConfiguredInstance(Map<String, String> parameters) {
+        return new ConcreteMinimizationFunction(this, parameters);
+    }
+
 }

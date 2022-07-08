@@ -9,11 +9,13 @@ import io.grpc.ForwardingServerCallListener.SimpleForwardingServerCallListener;
 public class DataMinimizerInterceptor implements ServerInterceptor {
 
     private final DataMinimizer minimizer;
-    private final ConfigParser config;
+    private final String keyServerHost;
+    private final int keyServerPort;
 
-    public DataMinimizerInterceptor(String configPath) {
-        config = new ConfigParser(configPath);
-        minimizer = new DataMinimizer(config);
+    protected DataMinimizerInterceptor(DataMinimizer minimizer, String keyServerHost, int keyServerPort) {
+        this.minimizer = minimizer;
+        this.keyServerHost = keyServerHost;
+        this.keyServerPort = keyServerPort;
     }
 
     @Override
@@ -21,7 +23,7 @@ public class DataMinimizerInterceptor implements ServerInterceptor {
             ServerCall<ReqT, RespT> serverCall,
             Metadata metadata,
             ServerCallHandler<ReqT, RespT> serverCallHandler) {
-        Authorization authorization = new Authorization(metadata, config);
+        Authorization authorization = new Authorization(metadata, keyServerHost, keyServerPort);
         if (authorization.getPurposeOrNull() == null) {
             serverCall.close(authorization.getErrorStatus(), new Metadata());
             return new ServerCall.Listener<ReqT>() {
@@ -48,9 +50,29 @@ public class DataMinimizerInterceptor implements ServerInterceptor {
         };
     }
 
+    public static DataMinimizerInterceptor.Builder newBuilder(String configPath) {
+        return new Builder(configPath);
+    }
 
-    public DataMinimizerInterceptor defineMinimizationFunction(String name, MinimizationFunction function) {
-        minimizer.defineMinimizationFunction(name, function);
-        return this;
+
+    public static class Builder {
+
+        private DataMinimizer minimizer;
+        private ConfigParser config;
+
+        private Builder(String configPath) {
+            config = new ConfigParser(configPath);
+            minimizer = new DataMinimizer();
+        }
+
+        public DataMinimizerInterceptor.Builder defineMinimizationFunction(String name, MinimizationFunction function) {
+            minimizer.defineMinimizationFunction(name, function);
+            return this;
+        }
+
+        public DataMinimizerInterceptor build() {
+            minimizer.loadConfig(config);
+            return new DataMinimizerInterceptor(minimizer, config.getKeyServerHost(), config.getKeyServerPort());
+        }
     }
 }

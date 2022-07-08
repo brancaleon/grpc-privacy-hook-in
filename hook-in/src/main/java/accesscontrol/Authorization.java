@@ -27,9 +27,9 @@ public class Authorization {
     private final String keyServerHost;
     private final int keyServerPort;
 
-    public Authorization(Metadata metadata, ConfigParser config) {
-        this.keyServerHost = config.getKeyServerHost();
-        this.keyServerPort = config.getKeyServerPort();
+    public Authorization(Metadata metadata, String keyServerHost, int keyServerPort) {
+        this.keyServerHost = keyServerHost;
+        this.keyServerPort = keyServerPort;
         String value = metadata.get(AccessControlClientCredentials.AUTHORIZATION_METADATA_KEY);
         if (value == null) {
             errorStatus = Status.UNAUTHENTICATED.withDescription("Authorization token is missing");
