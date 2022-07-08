@@ -112,28 +112,31 @@ public class DataMinimizer {
     public <MessageT extends Message> MessageT minimize(MessageT message, String purpose) {
         String messageType = message.getClass().getSimpleName();
         Map<String, List<ConcreteMinimizationFunction>> messageConfig = config.get(purpose).get(messageType);
-        MessageT.Builder builder = message.toBuilder();
-        for (String fieldName : messageConfig.keySet()) {
-            Descriptors.FieldDescriptor fieldDescriptor = message.getDescriptorForType().findFieldByName(fieldName);
-            if (fieldDescriptor.isRepeated()) {
-                List<Object> values = IntStream.range(0, message.getRepeatedFieldCount(fieldDescriptor))
-                        .mapToObj(i -> message.getRepeatedField(fieldDescriptor, i))
-                        .map(value -> applyOperation(fieldDescriptor, value, messageConfig.get(fieldName)))
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList());
-                builder.clearField(fieldDescriptor);
-                values.forEach(value -> builder.addRepeatedField(fieldDescriptor, value));
-            } else {
-                Object value = message.getField(fieldDescriptor);
-                value = applyOperation(fieldDescriptor, value, messageConfig.get(fieldName));
-                if (value != null) {
-                    builder.setField(fieldDescriptor, value);
-                } else {
+        if (messageConfig != null) {
+            MessageT.Builder builder = message.toBuilder();
+            for (String fieldName : messageConfig.keySet()) {
+                Descriptors.FieldDescriptor fieldDescriptor = message.getDescriptorForType().findFieldByName(fieldName);
+                if (fieldDescriptor.isRepeated()) {
+                    List<Object> values = IntStream.range(0, message.getRepeatedFieldCount(fieldDescriptor))
+                            .mapToObj(i -> message.getRepeatedField(fieldDescriptor, i))
+                            .map(value -> applyOperation(fieldDescriptor, value, messageConfig.get(fieldName)))
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toList());
                     builder.clearField(fieldDescriptor);
+                    values.forEach(value -> builder.addRepeatedField(fieldDescriptor, value));
+                } else {
+                    Object value = message.getField(fieldDescriptor);
+                    value = applyOperation(fieldDescriptor, value, messageConfig.get(fieldName));
+                    if (value != null) {
+                        builder.setField(fieldDescriptor, value);
+                    } else {
+                        builder.clearField(fieldDescriptor);
+                    }
                 }
             }
+            return (MessageT) builder.build();
         }
-        return (MessageT) builder.build();
+        return message;
     }
 
     private Object applyOperation(Descriptors.FieldDescriptor fieldDescriptor, Object value, List<ConcreteMinimizationFunction> operations) {
