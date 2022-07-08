@@ -2,11 +2,12 @@ package delivery.restaurant;
 
 import accesscontrol.AccessControlServerInterceptor;
 import clientside.AccessControlClientCredentials;
+import com.peng.gprc_hook_in.common.Driver;
 import com.peng.gprc_hook_in.common.ResultResponse;
 import com.peng.gprc_hook_in.driver.DriverCheckRequest;
 import com.peng.gprc_hook_in.driver.DriverServiceGrpc;
+import com.peng.gprc_hook_in.order.OrderRequest;
 import com.peng.gprc_hook_in.restaurant.CollectMealRequest;
-import com.peng.gprc_hook_in.restaurant.MealOrderRequest;
 import com.peng.gprc_hook_in.restaurant.RestaurantServiceGrpc;
 import dataminimization.DataMinimizerInterceptor;
 import delivery.utils.ServicesParser;
@@ -80,12 +81,14 @@ public class RestaurantServer {
 
     static class RestaurantImpl extends RestaurantServiceGrpc.RestaurantServiceImplBase {
         @Override
-        public void cookMeal(MealOrderRequest request, StreamObserver<ResultResponse> responseObserver) {
+        public void cookMeal(OrderRequest request, StreamObserver<ResultResponse> responseObserver) {
+            /*
             try {
-                TimeUnit.SECONDS.sleep(5);
+                TimeUnit.SECONDS.sleep(2);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+             */
             ResultResponse reply = ResultResponse.newBuilder().setStatus(SUCCESS).addMessages("Meal is ready").build();
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
@@ -94,9 +97,11 @@ public class RestaurantServer {
         @Override
         public void collectMeal(CollectMealRequest request, StreamObserver<ResultResponse> responseObserver) {
             String privateKeyPath = Paths.get(".").toAbsolutePath().normalize() + "/delivery/src/main/resources/privateKeys/private_key_restaurant.der";
-            String driverId = request.getDriverId();
-            int orderId = request.getOrderId();
-            DriverCheckRequest driverRequest = DriverCheckRequest.newBuilder().setDriverId(driverId).setOrderId(orderId).build();
+            Driver driver = request.getDriver();
+            OrderRequest orderRequest = request.getOrderRequest();
+            DriverCheckRequest driverRequest = DriverCheckRequest.newBuilder()
+                    .setDriver(driver)
+                    .setOrderRequest(orderRequest).build();
             Channel channel = ManagedChannelBuilder
                     .forAddress(servicesParser.getHost("driver"),
                             servicesParser.getPort("driver"))

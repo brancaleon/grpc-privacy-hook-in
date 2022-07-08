@@ -7,16 +7,13 @@ option objc_class_prefix = "HLW";
 
 package proto;
 import "common.proto";
+import "order.proto";
 
 message DeliveryAddress{
     string address = 1;
-    optional string city = 3;
-    optional string zip = 4;
-    optional string country = 5;
-}
-
-message RoutingRequest{
-    DeliveryAddress address = 1;
+    string city = 3;
+    string zip = 4;
+    string country = 5;
 }
 
 message RouteResponse{
@@ -25,5 +22,5 @@ message RouteResponse{
 }
 
 service RoutingService {
-    rpc ComputeRoute (RoutingRequest) returns (RouteResponse);
+    rpc ComputeRoute (OrderRequest) returns (RouteResponse);
 }

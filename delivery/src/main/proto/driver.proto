@@ -7,17 +7,14 @@ option objc_class_prefix = "HLW";
 
 package proto;
 import "common.proto";
+import "order.proto";
 
 message DriverAssignmentRequest{
-    string driverId = 1;
-    int32 orderId = 2;
+    Driver driver = 1;
+    OrderRequest orderRequest = 2;
 }
 
 message DriverListRequest {
-}
-
-message DriverInfoRequest {
-    string driverId = 1;
 }
 
 message AvailableDriversResponse {
@@ -25,8 +22,8 @@ message AvailableDriversResponse {
 }
 
 message DriverCheckRequest{
-    string driverId = 1;
-    int32 orderId = 2;
+    Driver driver = 1;
+    OrderRequest orderRequest = 2;
 }
 
 service DriverService {

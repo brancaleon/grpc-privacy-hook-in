@@ -2,8 +2,10 @@ package delivery.driver;
 
 import accesscontrol.AccessControlServerInterceptor;
 import com.peng.gprc_hook_in.common.Driver;
+import com.peng.gprc_hook_in.common.Position;
 import com.peng.gprc_hook_in.common.ResultResponse;
 import com.peng.gprc_hook_in.driver.*;
+import com.peng.gprc_hook_in.order.OrderRequest;
 import dataminimization.DataMinimizerInterceptor;
 import delivery.utils.ServicesParser;
 import io.grpc.Server;
@@ -75,13 +77,15 @@ public class DriverServer {
 
         @Override
         public void getAvailableDrivers(DriverListRequest request, StreamObserver<AvailableDriversResponse> responseObserver) {
-            // TODO: retrieve drivers from db with status "available"
-            AvailableDriversResponse reply = AvailableDriversResponse.newBuilder()
-                    .setDrivers(0,
-                            Driver.newBuilder()
-                                    .setId("1")
-                                    .setName("Professor")
-                                    .setSurname("Tai")
+            AvailableDriversResponse reply = AvailableDriversResponse.newBuilder().addDrivers(
+                        Driver.newBuilder()
+                                .setId("1")
+                                .setName("Dr")
+                                .setSurname("Grunewald")
+                                .setPosition(Position.newBuilder()
+                                        .setLatitude((float) 52.5125)
+                                        .setLongitude((float) 13.3269)
+                                .build())
                     ).build();
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
@@ -89,9 +93,9 @@ public class DriverServer {
 
         @Override
         public void assignDriver(DriverAssignmentRequest request, StreamObserver<ResultResponse> responseObserver) {
-            // TODO: link the driver to the order on db
-            String driverId = request.getDriverId();
-            Integer orderId = request.getOrderId();
+            // link the driver to the order on db
+            Driver driver = request.getDriver();
+            OrderRequest orderRequest = request.getOrderRequest();
             ResultResponse reply = ResultResponse.newBuilder().setStatus(SUCCESS).build();
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
@@ -99,12 +103,9 @@ public class DriverServer {
 
         @Override
         public void checkDriverId(DriverCheckRequest request, StreamObserver<ResultResponse> responseObserver) {
-            // TODO: really check that driver is linked to that order
-            //  retrieve order on db by id
-            //  extract driver_id assigned to order
             String orderDriverId = "1";
             ResultResponse reply = null;
-            if (request.getDriverId().equals(orderDriverId)) {
+            if (request.getDriver().getId().equals(orderDriverId)) {
                 reply = ResultResponse.newBuilder().setStatus(SUCCESS).build();
             } else {
                 reply = ResultResponse.newBuilder()

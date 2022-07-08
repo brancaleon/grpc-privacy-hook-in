@@ -7,9 +7,8 @@ import com.peng.gprc_hook_in.common.Position;
 import com.peng.gprc_hook_in.driver.AvailableDriversResponse;
 import com.peng.gprc_hook_in.driver.DriverListRequest;
 import com.peng.gprc_hook_in.driver.DriverServiceGrpc;
-import com.peng.gprc_hook_in.routing.DeliveryAddress;
+import com.peng.gprc_hook_in.order.OrderRequest;
 import com.peng.gprc_hook_in.routing.RouteResponse;
-import com.peng.gprc_hook_in.routing.RoutingRequest;
 import com.peng.gprc_hook_in.routing.RoutingServiceGrpc;
 import dataminimization.DataMinimizerInterceptor;
 import delivery.utils.ServicesParser;
@@ -81,10 +80,8 @@ public class RoutingServer {
     static class RoutingImpl extends RoutingServiceGrpc.RoutingServiceImplBase {
 
         @Override
-        public void computeRoute(RoutingRequest request, StreamObserver<RouteResponse> responseObserver) {
+        public void computeRoute(OrderRequest request, StreamObserver<RouteResponse> responseObserver) {
             String privateKeyPath = Paths.get(".").toAbsolutePath().normalize() + "/delivery/src/main/resources/privateKeys/private_key_routing.der";
-            // TODO: choose the closest driver and compute the route for him
-            //  Retrieve list of available drivers
             Channel channel = ManagedChannelBuilder
                     .forAddress(servicesParser.getHost("driver"),
                             servicesParser.getPort("driver"))
@@ -94,18 +91,18 @@ public class RoutingServer {
                     .withCallCredentials(new AccessControlClientCredentials(clientId, "route_computation", privateKeyPath));
             DriverListRequest driverListRequest = DriverListRequest.newBuilder().build();
             AvailableDriversResponse drivers = driverStub.getAvailableDrivers(driverListRequest);
-            DeliveryAddress deliveryAddress = request.getAddress();
+            String deliveryAddress = request.getAddress();
             Driver chosenDriver = this.findClosestDriver(drivers, deliveryAddress);
             RouteResponse reply = this.findRoute(chosenDriver.getPosition(), deliveryAddress);
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
         }
 
-        public Driver findClosestDriver(AvailableDriversResponse drivers, DeliveryAddress deliveryAddress) {
+        public Driver findClosestDriver(AvailableDriversResponse drivers, String deliveryAddress) {
             return drivers.getDrivers(0);
         }
 
-        public RouteResponse findRoute(Position position, DeliveryAddress deliveryAddress) {
+        public RouteResponse findRoute(Position position, String deliveryAddress) {
             return RouteResponse.newBuilder()
                     .addRoute(Position.newBuilder().setLatitude(1).setLatitude(3))
                     .addRoute(Position.newBuilder().setLatitude(5).setLatitude(8))
