@@ -87,8 +87,8 @@ public class OrderServer {
         @Override
         public void orderMeal(OrderRequest orderRequest, StreamObserver<ResultResponse> responseObserver) {
             int orderId = 1;
-            System.out.println("Name: " + orderRequest.getName()); // Test output for minimization
-            System.out.println("Surname: " + orderRequest.getSurname());
+            // System.out.println("Name: " + orderRequest.getName()); // Test output for minimization
+            // System.out.println("Surname: " + orderRequest.getSurname());
             String meal = orderRequest.getMeal();
             // 1. Send meal info to restaurant for cooking
             ResultResponse mealReady = this.SendMealInfo(orderRequest);

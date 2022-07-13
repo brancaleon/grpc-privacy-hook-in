@@ -16,7 +16,7 @@
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
-          <stringProp name="LoopController.loops">1000</stringProp>
+          <stringProp name="LoopController.loops">5000</stringProp>
         </elementProp>
         <stringProp name="ThreadGroup.num_threads">1</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
@@ -29,7 +29,7 @@
         <vn.zalopay.benchmark.GRPCSampler guiclass="vn.zalopay.benchmark.GRPCSamplerGui" testclass="vn.zalopay.benchmark.GRPCSampler" testname="OrderMeal request WITH component" enabled="true">
           <stringProp name="GRPCSampler.protoFolder">/home/brancaleone/Insync/riccardomarin23@gmail.com/Google Drive/University/SS22 - Privacy Engineering/Implementation/delivery/src/main/proto</stringProp>
           <stringProp name="GRPCSampler.libFolder"></stringProp>
-          <stringProp name="GRPCSampler.metadata">{&quot;clientId&quot;:&quot;client&quot;, &quot;Authorization&quot;:&quot;Bearer eyJhbGciOiJSUzUxMiJ9.eyJqdGkiOiJmNWRmNjU1ZC01MzVjLTQyNWYtYjIzMy05OWU4OWE1N2IwMGUiLCJwdXJwb3NlIjoibWVhbF9wdXJjaGFzZSIsInN1YiI6ImNsaWVudCIsImlhdCI6MTY1NzY1NTA1MCwiZXhwIjoxNjU3NjgzODUwfQ.xnea1s2lHkSB4SzLHZNQakWOhPPJ_trRyAeU0jdX92CSoViagDQU1VI0vv_JbzsbxSxHFE5fsqsoJ9zlXY6mS2RKcXJh8vwN3B0CFuUUUD4GWHwtYsLuT46uvRvcWCDS1hdD-LAza6jmQBLtRIJ8rDlXh4njoWMMw0836-XB8ETjl5ldjTaELwARC5XMIIJ3TSGV33AyeOUW0L7VMSEBVMsQqXX9Gcy6lQUDzmapGXR_8TX-1xJiCcOVI4ZFrnN8YYo8c_-p27me8SAd5WyTDj_l8W6OTROGhrNbotJuwSkRQub6n-1Jcg5WO0pGTP5C1NrCFvaHlb0GMNqjOFdu6w&quot;}</stringProp>
+          <stringProp name="GRPCSampler.metadata">{&quot;clientId&quot;:&quot;client&quot;, &quot;Authorization&quot;:&quot;Bearer eyJhbGciOiJSUzUxMiJ9.eyJqdGkiOiI3MTk1NTUxOS1iMzZiLTRjMzQtODUwOC01MzIzNzkxODBmZWYiLCJwdXJwb3NlIjoibWVhbF9wdXJjaGFzZSIsInN1YiI6ImNsaWVudCIsImlhdCI6MTY1NzcyNjg1NSwiZXhwIjoxNjU3NzU1NjU1fQ.Z8cfDaYq-VK-YZb2YsbrB3h5V6Ry7NUCWw8oySZML9uMXj1DKNI23kDpy3NBSPCpQOhrU-f5rM8Gqtrs-yoO9tyTL6qUT9U8Bc9jdV0SHN7a-eG8tvtof5r0TVamsOwYnHUAOP-1zU_2hWUu_Jotkea40Ge_qTI0oju96A-0AqIP_NiwrJYVMDbFxk0vNaN5TgHS-OGMs0zmXq-uPerEm_5C_ZiljE_DZMN4pAUMlJqDlZuERwS_an1wyXBbqAkewwJHGAnHnWqX5KzzQCctIzQhM1YcNglj35EWT5ysGyn7KBKjBjqrp4gl3s3rN4WSf-FDGy7hb5kp6OtIeDY2ow&quot;}</stringProp>
           <stringProp name="GRPCSampler.host">localhost</stringProp>
           <stringProp name="GRPCSampler.port">50002</stringProp>
           <stringProp name="GRPCSampler.fullMethod">proto.OrderService/OrderMeal</stringProp>

@@ -6,8 +6,13 @@
   "purposes": {
     "meal_purchase": {
       "name": "Meal purchase",
-      "allowed_clients": [ "client", "order" ],
-      "allowed_methods": [ "proto.OrderService/OrderMeal" ],
+      "allowed_clients": [
+        "client",
+        "order"
+      ],
+      "allowed_methods": [
+        "proto.OrderService/OrderMeal"
+      ],
       "minimization": {
         "OrderRequest": {
           "name": [
@@ -39,7 +44,26 @@
       ],
       "allowed_methods": [
         "proto.RestaurantService/CookMeal"
-      ]
+      ],
+      "minimization": {
+        "OrderRequest": {
+          "name": [
+            {
+              "function": "erasure"
+            }
+          ],
+          "surname": [
+            {
+              "function": "erasure"
+            }
+          ],
+          "meal": [
+            {
+              "function": "erasure"
+            }
+          ]
+        }
+      }
     },
     "meal_collection": {
       "name": "Meal collection",
@@ -59,7 +83,26 @@
       "allowed_methods": [
         "proto.RoutingService/ComputeRoute",
         "proto.DriverService/GetAvailableDrivers"
-      ]
+      ],
+      "minimization": {
+        "OrderRequest": {
+          "name": [
+            {
+              "function": "erasure"
+            }
+          ],
+          "surname": [
+            {
+              "function": "erasure"
+            }
+          ],
+          "meal": [
+            {
+              "function": "erasure"
+            }
+          ]
+        }
+      }
     },
     "delivery_assignment": {
       "name": "Delivery assignment",
