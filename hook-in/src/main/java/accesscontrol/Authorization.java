@@ -13,6 +13,12 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -36,12 +42,43 @@ public class Authorization {
         } else if (!value.startsWith(AccessControlClientCredentials.BEARER_TYPE)) {
             errorStatus = Status.UNAUTHENTICATED.withDescription("Unknown authorization type");
         } else {
-            // remove authorization type prefix
-            // TODO: check if public key is already stored
-
-            // TODO: if not, request it to the KeyServer
-            PublicKey public_key = getPublicKey(metadata.get(AccessControlClientCredentials.CLIENT_ID_METADATA_KEY));
-
+            String client_id = metadata.get(AccessControlClientCredentials.CLIENT_ID_METADATA_KEY);
+            String keyPath = Paths.get(".").toAbsolutePath().normalize()
+                    + String.format("/delivery/src/main/java/delivery/%s/public_key_%s.der", client_id, client_id);
+            PublicKey public_key = null;
+            File f = new File(keyPath);
+            // check if public key is already stored/cached
+            if(f.exists() && !f.isDirectory()) {
+                byte[] publicKeyBytes;
+                try {
+                    publicKeyBytes = Files.readAllBytes(Paths.get(keyPath));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                X509EncodedKeySpec spec = new X509EncodedKeySpec(publicKeyBytes);
+                KeyFactory kf = null;
+                try {
+                    kf = KeyFactory.getInstance("RSA");
+                } catch (NoSuchAlgorithmException e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    public_key = kf.generatePublic(spec);
+                } catch (InvalidKeySpecException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            else{
+                byte[] publicKeyBytes = getPublicKeyBytes(client_id);
+                public_key = getPublicKeyFromBytes(publicKeyBytes);
+                try (FileOutputStream stream = new FileOutputStream(keyPath)) {
+                    stream.write(publicKeyBytes);
+                } catch (FileNotFoundException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             String token = value.substring(AccessControlClientCredentials.BEARER_TYPE.length()).trim();
             try {
                 JwtParser parser = Jwts.parser().setSigningKey(public_key);
@@ -55,7 +92,7 @@ public class Authorization {
         }
     }
 
-    private PublicKey getPublicKey(String clientId) {
+    private byte[] getPublicKeyBytes(String clientId){
         PublicKeyRequest publicKeyRequest = PublicKeyRequest.newBuilder()
                 .setClient(clientId).build();
         Channel channel = ManagedChannelBuilder
@@ -64,7 +101,10 @@ public class Authorization {
         KeyServerServiceGrpc.KeyServerServiceBlockingStub keyserverStub = KeyServerServiceGrpc
                 .newBlockingStub(channel);
         PublicKeyResponse response = keyserverStub.getPublicKey(publicKeyRequest);
-        byte[] publicKeyBytes = response.getKey().toByteArray();
+        return response.getKey().toByteArray();
+    }
+
+    private PublicKey getPublicKeyFromBytes(byte[] publicKeyBytes) {
         X509EncodedKeySpec spec = new X509EncodedKeySpec(publicKeyBytes);
         try {
             KeyFactory kf = KeyFactory.getInstance("RSA");
