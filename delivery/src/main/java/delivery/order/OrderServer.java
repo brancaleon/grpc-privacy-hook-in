@@ -86,13 +86,18 @@ public class OrderServer {
 
         @Override
         public void orderMeal(OrderRequest orderRequest, StreamObserver<ResultResponse> responseObserver) {
-            // TODO: test entire application
             int orderId = 1;
-//            System.out.println("Name: " + request.getName()); // Test output for minimization
-//            System.out.println("Surname: " + request.getSurname());
+            // System.out.println("Name: " + request.getName()); // Test output for minimization
+            // System.out.println("Surname: " + request.getSurname());
             String meal = orderRequest.getMeal();
-//             1. Send meal info to restaurant for cooking
+            // 1. Send meal info to restaurant for cooking
             ResultResponse mealReady = this.SendMealInfo(orderRequest);
+            /*
+            // Finish here the execution when we want to test a simple request-response
+            ResultResponse reply = ResultResponse.newBuilder().setStatus(SUCCESS).build();
+            responseObserver.onNext(reply);
+            responseObserver.onCompleted();
+            */
             // 2. Find route through RoutingService
             RouteResponse routeInfo = this.FindRoute(orderRequest);
             Driver driver = routeInfo.getChosenDriver();

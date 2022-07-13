@@ -16,7 +16,7 @@
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
-          <stringProp name="LoopController.loops">5000</stringProp>
+          <stringProp name="LoopController.loops">10000</stringProp>
         </elementProp>
         <stringProp name="ThreadGroup.num_threads">1</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
@@ -117,7 +117,7 @@
             <connectTime>true</connectTime>
           </value>
         </objProp>
-        <stringProp name="filename"></stringProp>
+        <stringProp name="filename">/home/brancaleone/Insync/riccardomarin23@gmail.com/Google Drive/University/SS22 - Privacy Engineering/Implementation/benchmark/without_component_order_meal.csv</stringProp>
         <boolProp name="useGroupName">true</boolProp>
       </ResultCollector>
       <hashTree/>
@@ -155,7 +155,7 @@
             <connectTime>true</connectTime>
           </value>
         </objProp>
-        <stringProp name="filename"></stringProp>
+        <stringProp name="filename">/home/brancaleone/Insync/riccardomarin23@gmail.com/Google Drive/University/SS22 - Privacy Engineering/Implementation/benchmark/without_component_order_meal.csv</stringProp>
       </ResultCollector>
       <hashTree/>
     </hashTree>
