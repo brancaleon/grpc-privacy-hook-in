@@ -24,14 +24,13 @@ public class Client {
     }
 
     public void test() {
-        // TODO: benchmarking
         System.out.println("Order start");
         String keyPath = Paths.get(".").toAbsolutePath().normalize() + "/delivery/src/main/resources/privateKeys/private_key_client.der";
         OrderRequest request = OrderRequest.newBuilder()
-                .setName("Professor")
-                .setSurname("Tai")
-                .setAddress("Strasse des 17 Juni")
-                .setMeal("Currywurst")
+                .setName("Max")
+                .setSurname("Mustermann")
+                .setAddress("Straße des 17. Juni 135, 10623 Berlin")
+                .setMeal("Döner Kebab")
                 .build();
         Channel channel = ManagedChannelBuilder.forAddress(
                         servicesParser.getHost("order"),
