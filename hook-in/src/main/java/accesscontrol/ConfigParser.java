@@ -43,6 +43,8 @@ public class ConfigParser {
     }
 
     private boolean isRejectedForPurpose(String purpose, String givenValue, String jsonKeyword) {
+        // TODO: caching json file
+        // TODO: nullPointerException when purpose name is not found
         ArrayNode allowedValues = (ArrayNode) purposesConfig.get("purposes").get(purpose).get(jsonKeyword);
         if (allowedValues.isArray()) {
             for (JsonNode allowedValue : allowedValues) {

@@ -81,7 +81,7 @@ public class DriverServer {
                         Driver.newBuilder()
                                 .setId("1")
                                 .setName("Dr")
-                                .setSurname("Grunewald")
+                                .setSurname("Oetker")
                                 .setPosition(Position.newBuilder()
                                         .setLatitude((float) 52.5125)
                                         .setLongitude((float) 13.3269)

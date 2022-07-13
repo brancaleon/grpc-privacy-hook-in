@@ -37,11 +37,14 @@ public class Authorization {
             errorStatus = Status.UNAUTHENTICATED.withDescription("Unknown authorization type");
         } else {
             // remove authorization type prefix
+            // TODO: check if public key is already stored
+
+            // TODO: if not, request it to the KeyServer
+            PublicKey public_key = getPublicKey(metadata.get(AccessControlClientCredentials.CLIENT_ID_METADATA_KEY));
+
             String token = value.substring(AccessControlClientCredentials.BEARER_TYPE.length()).trim();
             try {
-                JwtParser parser = Jwts.parser().setSigningKey(
-                        getPublicKey(metadata.get(AccessControlClientCredentials.CLIENT_ID_METADATA_KEY))
-                );
+                JwtParser parser = Jwts.parser().setSigningKey(public_key);
                 // verify token signature and parse claims
                 Jws<Claims> claims = parser.parseClaimsJws(token);
                 subject = claims.getBody().getSubject();
